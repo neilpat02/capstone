@@ -1,6 +1,6 @@
 <script>
 	import { Router, Link, Route } from "svelte-routing";
-  	import Login from "./routes/login.svelte";
+  	import Login from "./routes/LoginPage.svelte";
 </script>
 
 <main>
