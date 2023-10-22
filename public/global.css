@@ -1,3 +1,12 @@
+:root{
+	--uga-red: #ff0000;
+	--uga-black: #000000;
+	--uga-white: #ffffff;
+}
+.myElement {
+    background-color: var(--uga-red);
+}
+
 html, body {
 	position: relative;
 	width: 100%;
@@ -5,11 +14,32 @@ html, body {
 }
 
 body {
-	color: #333;
+	
 	margin: 0;
 	padding: 8px;
 	box-sizing: border-box;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	background-color: var(--uga-white) !important;
+	color: var(--uga-black) !important;
+}
+
+h1, h2, h3, .highlight {
+    color: var(--uga-red) !important;
+}
+
+.navbar, .footer {
+    background-color: var(--uga-black) !important;
+    color: var(--uga-white) !important;
+}
+
+.button-primary {
+    background-color: var(--uga-red) !important;
+    color: var(--uga-white) !important;
+}
+
+.button-secondary {
+    background-color: var(--uga-black) !important;
+    color: var(--uga-white) !important;
 }
 
 a {

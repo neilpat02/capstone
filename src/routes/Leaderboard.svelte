@@ -4,7 +4,7 @@
 
 <main>
     <div class="container-fluid">
-        <h1>Home Page</h1>
+        <h1>Leaderboard</h1>
     </div>
 </main>
 
