@@ -1,9 +1,10 @@
 <script>
 	import { Router, Link, Route } from "svelte-routing";
     import Login from "./routes/LoginPage.svelte";
-    import Signup from "./routes/SignupPage.svelte";
+    import Signup from "./routes/SignUpPage.svelte";
 	import Home from "./routes/HomePage.svelte";
     import Leaderboard from "./routes/Leaderboard.svelte";
+    import MazeSimulator from "./routes/MazeSimulator.svelte";
 </script>
 
 <main>
@@ -32,6 +33,9 @@
                     <li class="nav-item">
                         <Link class="nav-link" to="/leaderboard">Leaderboard</Link>
                     </li>
+                    <li class ="nav-item">
+                        <Link class = "nav-link" to="/mazesimulator"> Maze Simulator </Link>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -40,7 +44,9 @@
 		<Route path="/" component={Home} />
 		<Route path="/login" component={Login} />
 		<Route path="/signup" component={Signup} />
-    <Route path= "/leaderboard" component={Leaderboard} />
+        <Route path= "/leaderboard" component={Leaderboard} />
+        <Route path = "/mazesimulator" component={MazeSimulator} />
+    
 		
 	</Router>
 </main>
