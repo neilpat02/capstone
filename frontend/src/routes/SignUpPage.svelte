@@ -5,29 +5,25 @@
     let password = '';
 
     async function handleSubmit() {
-        // Simulate a sign-up by showing an alert
-        alert('Sign up complete!');
+        try {
+            const response = await fetch('http://localhost:3000/api/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({firstName, lastName, email, password}),
+            });
 
-        // The code below is commented out because it requires a backend API server.
-        // When your backend is ready, you can uncomment this and set up the correct endpoint.
+            const result = await response.json();
 
-        /*
-        const response = await fetch('/api/signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ firstName, lastName, email, password }),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            // Handle success - maybe redirect to the login page or dashboard
-        } else {
-            // Handle error - display an error message from result
+            if (response.ok) {
+                alert("Sign Up Successful!")
+            } else {
+                alert("Error: ${result.message}")
+            }
+        } catch (error) {
+            alert("Error Occured: ${error.message}")
         }
-        */
     }
 </script>
 
