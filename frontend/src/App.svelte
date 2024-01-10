@@ -12,7 +12,7 @@
         <div class="container-fluid">
             <div class="navbar-brand">
                 <p>Maze-Competition TestBed</p>
-                <img src="/assets/images/HeroLab.png" alt="HeRoLab logo" class="img-fluid" style="max-width: 100px;">
+                <img src="/assets/images/logo.png" alt="UGA logo" class="img-fluid" style="max-width: 100px;">
             </div>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
