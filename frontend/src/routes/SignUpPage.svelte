@@ -1,6 +1,5 @@
 <script>
-    let firstName = '';
-    let lastName = '';
+    let teamName = '';
     let email = '';
     let password = '';
 
@@ -11,7 +10,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({firstName, lastName, email, password}),
+                body: JSON.stringify({teamName, email, password}),
             });
 
             const result = await response.json();
@@ -91,8 +90,7 @@
 <div class="signup-container">
     <h2>Create your account</h2>
     <form on:submit|preventDefault={handleSubmit}>
-        <input type="text" bind:value={firstName} class="form-control" placeholder="First Name" required>
-        <input type="text" bind:value={lastName} class="form-control" placeholder="Last Name" required>
+        <input type="text" bind:value={teamName} class="form-control" placeholder="Team Name" required>
         <input type="email" bind:value={email} class="form-control" placeholder="Email" required>
         <input type="password" bind:value={password} class="form-control" placeholder="Password" required>
         <button type="submit" class="signup-btn">Sign Up</button>

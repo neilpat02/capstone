@@ -24,24 +24,24 @@ app.get('/', (req, res) => {
 
 // Define the signup route
 app.post('/api/signup', async (req, res) => {
-    try {
-        const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
-        const existingUser = await User.findOne({ email: req.body.email });
-        if (existingUser) {
-            return res.status(409).json({ message: "Email already exists" });
-        }
-        const user = new User({
-            ...req.body,
-            password: hashedPassword,
-        });
+  try {
+      const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+      const existingUser = await User.findOne({ email: req.body.email });
+      if (existingUser) {
+          return res.status(409).json({ message: "Email already exists" });
+      }
+      const user = new User({
+          teamName: req.body.teamName,
+          email: req.body.email,
+          password: hashedPassword,
+      });
 
-        const savedUser = await user.save();
+      const savedUser = await user.save();
 
-        res.status(201).json({user: { ...savedUser._doc, password: undefined } });
-    } catch (error) {
-        // Handle errors, such as duplicate email, etc.
-        res.status(500).json({ message: error.message });
-    }
+      res.status(201).json({ user: { ...savedUser._doc, password: undefined } });
+  } catch (error) {
+      res.status(500).json({ message: error.message });
+  }
 });
 
 // Define the login route
