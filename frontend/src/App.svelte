@@ -1,53 +1,65 @@
 <script>
-	import { Router, Link, Route } from "svelte-routing";
-    import Login from "./routes/LoginPage.svelte";
-    import Signup from "./routes/SignUpPage.svelte";
-	import Home from "./routes/HomePage.svelte";
-    import Leaderboard from "./routes/Leaderboard.svelte";
-    import MazeSimulator from "./routes/MazeSimulator.svelte";
+	import Beranda from "./Beranda.svelte";
+	import SignUp from "./SignUp.svelte";
+	import Toko from "./Toko.svelte";
+	import Resto from "./Resto.svelte";
+	import Pricing from "./Pricing.svelte";
+	import Contact from "./Contact.svelte";
+	export let menu = 1;
 </script>
-
-<main>
-	<Router>
-    <nav class="navbar navbar-light bg-light">
-        <div class="container-fluid">
-            <div class="navbar-brand">
-                <p>Maze-Competition TestBed</p>
-                <img src="/assets/images/logo.png" alt="UGA logo" class="img-fluid" style="max-width: 100px;">
-            </div>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item mr-3">
-                        <Link class="nav-link" to="/">Home</Link>
-                    </li>
-                    <li class="nav-item mr-3">
-                        <Link class="nav-link" to="/login">Login</Link>
-                    </li>
-                    <li class="nav-item mr-3">
-                        <Link class="nav-link" to="/signup">Sign Up</Link>
-                    </li>
-                    <li class="nav-item">
-                        <Link class="nav-link" to="/leaderboard">Leaderboard</Link>
-                    </li>
-                    <li class ="nav-item">
-                        <Link class = "nav-link" to="/mazesimulator"> Maze Simulator </Link>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-		<Route path="/" component={Home} />
-		<Route path="/login" component={Login} />
-		<Route path="/signup" component={Signup} />
-        <Route path= "/leaderboard" component={Leaderboard} />
-        <Route path = "/mazesimulator" component={MazeSimulator} />
-    
+<nav id="menu" class="navbar" role="navigation" aria-label="main navigation">
+	<div class="navbar-brand">
+	  <a class="navbar-item" href="/" on:click|preventDefault={() => (menu = 1)}>
+		<img alt="toko online shop whatsapp" 
+		src="https://whatshop.vercel.app/static/76ab27c35420dc20ecbd3d70623dda31/af9bc/logos.avif" 
+		/>
+	  </a>
+	  <button role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+		<span aria-hidden="true"></span>
+		<span aria-hidden="true"></span>
+		<span aria-hidden="true"></span>
+	  </button>
+	</div>
+	<div id="navbarBasicExample" class="navbar-menu">
+	  <div class="navbar-start">
+			<a class="navbar-item" href="/" on:click|preventDefault={() => (menu = 1)}>Home</a>
 		
-	</Router>
-</main>
+			<a class="navbar-item" href="/" on:click|preventDefault={() => (menu = 2)}>SignUp</a>
+			<a class="navbar-item" href="/" on:click|preventDefault={() => (menu = 3)}>Toko</a>
+			<a class="navbar-item" href="/" on:click|preventDefault={() => (menu = 4)}>Resto</a>
+			<a class="navbar-item" href="/" on:click|preventDefault={() => (menu = 5)}>Pricing</a>
+			<a class="navbar-item" href="/" on:click|preventDefault={() => (menu = 6)}>Contact</a>
+	  </div>
+	  <div class="navbar-end">
+		<div class="navbar-item">
+		  <div class="buttons">
+			<a href="https://wa.me/62895339403223" class="button is-primary">
+			  <strong>Chat Now</strong>
+			</a>
+			<a href="https://github.com/mesinkasir/svelte-bulma" class="button is-dark">
+			  Github
+			</a>
+		  </div>
+		</div>
+	  </div>
+	</div>
+  </nav>
+
+{#if menu === 1}
+<Beranda />
+{:else if menu === 2}
+<SignUp />
+{:else if menu === 3}
+<Toko />
+{:else if menu === 4}
+<Resto />
+{:else if menu === 5}
+<Pricing />
+{:else if menu === 6}
+<Contact />
+{:else}
+<h1>
+	404 Page Not Found
+</h1>
+{/if}
 

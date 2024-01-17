@@ -1,107 +1,39 @@
-# This repo is no longer maintained. Consider using `npm init vite` and selecting the `svelte` option or — if you want a full-fledged app framework — use [SvelteKit](https://kit.svelte.dev), the official application framework for Svelte.
+# Bulma Svelte website themes template
 
----
+[Demo Svelte Bulma →](https://whatsappshop.vercel.app/)
 
-# svelte app
+documentation & tutorial : [https://www.hockeycomputindo.com/2021/10/svelte-bulma-website-template-themes.html](https://www.hockeycomputindo.com/2021/10/svelte-bulma-website-template-themes.html)
 
-This is a project template for [Svelte](https://svelte.dev) apps. It lives at https://github.com/sveltejs/template.
+[Demo Video Svelte Bulma →](https://www.youtube.com/watch?v=EgoBaJ3TRyk)
 
-To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
-
-```bash
-npx degit sveltejs/template svelte-app
-cd svelte-app
-```
-
-*Note that you will need to have [Node.js](https://nodejs.org) installed.*
+<a href="https://www.buymeacoffee.com/axcora"><img width="240" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgIA9HMwkK8kr7uRwVNxnhXsLQsJHxQQYVSzqCAaK58OpJOiTlzbIX7eEwS_VpJ3oEG-xrmVEl2WKqGvB_o-KjyBGTbbjFHM_bN2Jce9g3FTnt2ZJViwcvB9DHPOKPEMCl7jTQRVWKPw_ETloH7_CK8Xr09SSNNx22xnfGjViwdEsGtR-yGrLmr-JUGHA/s1090/bmc-button.png"/></a>
 
 
-## Get started
+![new svelte bulma website template themes](https://1.bp.blogspot.com/-CD6tI-9RqDE/YXDU71anyWI/AAAAAAAARaM/ppGnt_Ob0tce3gR3INp6VVLe_Q9UGG_ewCLcBGAsYHQ/s2048/svelte%2Bbuma%2Btemplate%2B%25281%2529.png)
 
-Install the dependencies...
-
-```bash
-cd svelte-app
-npm install
-```
-
-...then start [Rollup](https://rollupjs.org):
-
-```bash
-npm run dev
-```
-
-Navigate to [localhost:8080](http://localhost:8080). You should see your app running. Edit a component file in `src`, save it, and reload the page to see your changes.
-
-By default, the server will only respond to requests from localhost. To allow connections from other computers, edit the `sirv` commands in package.json to include the option `--host 0.0.0.0`.
-
-If you're using [Visual Studio Code](https://code.visualstudio.com/) we recommend installing the official extension [Svelte for VS Code](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode). If you are using other editors you may need to install a plugin in order to get syntax highlighting and intellisense.
-
-## Building and running in production mode
-
-To create an optimised version of the app:
-
-```bash
-npm run build
-```
-
-You can run the newly built app with `npm run start`. This uses [sirv](https://github.com/lukeed/sirv), which is included in your package.json's `dependencies` so that the app will work when you deploy to platforms like [Heroku](https://heroku.com).
+Home page 
 
 
-## Single-page app mode
+![new svelte bulma website template themes](https://1.bp.blogspot.com/-KUyZCbF18xs/YXDU7TIX1bI/AAAAAAAARaI/sEM3-l-VS1EWUvXQ9ZGqzVy-jOK2ydWwQCLcBGAsYHQ/s671/svelte%2Bbuma%2Btemplate%2B%25282%2529.png)
 
-By default, sirv will only respond to requests that match files in `public`. This is to maximise compatibility with static fileservers, allowing you to deploy your app anywhere.
+Mobile view
 
-If you're building a single-page app (SPA) with multiple routes, sirv needs to be able to respond to requests for *any* path. You can make it so by editing the `"start"` command in package.json:
+![new svelte bulma website template themes](https://1.bp.blogspot.com/-Ree78uiBzKw/YXDU8AeW77I/AAAAAAAARaQ/V098lw1XGyEeNVIdmO2WjAdqrs9u5um8QCLcBGAsYHQ/s1450/svelte%2Bbuma%2Btemplate%2B%25283%2529.png)
 
-```js
-"start": "sirv public --single"
-```
+Example page with image
 
-## Using TypeScript
+![new svelte bulma website template themes](https://1.bp.blogspot.com/-mxP4Fec8_w4/YXDU-W1q0xI/AAAAAAAARaY/kNIrOfDns5M2FaErmDkeV11ybtOj11msgCLcBGAsYHQ/s1801/svelte%2Bbuma%2Btemplate%2B%25285%2529.png)
 
-This template comes with a script to set up a TypeScript development environment, you can run it immediately after cloning the template with:
+Other page with video
 
-```bash
-node scripts/setupTypeScript.js
-```
+-----------------------------------------------
 
-Or remove the script via:
+### Buy me a coffee :hearts: ✌🏻
 
-```bash
-rm scripts/setupTypeScript.js
-```
+:coffee: :coffee: :coffee: 
 
-If you want to use `baseUrl` or `path` aliases within your `tsconfig`, you need to set up `@rollup/plugin-alias` to tell Rollup to resolve the aliases. For more info, see [this StackOverflow question](https://stackoverflow.com/questions/63427935/setup-tsconfig-path-in-svelte).
+<a href="https://www.buymeacoffee.com/axcora"><img width="240" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgIA9HMwkK8kr7uRwVNxnhXsLQsJHxQQYVSzqCAaK58OpJOiTlzbIX7eEwS_VpJ3oEG-xrmVEl2WKqGvB_o-KjyBGTbbjFHM_bN2Jce9g3FTnt2ZJViwcvB9DHPOKPEMCl7jTQRVWKPw_ETloH7_CK8Xr09SSNNx22xnfGjViwdEsGtR-yGrLmr-JUGHA/s1090/bmc-button.png"/></a>
 
-## Deploying to the web
+----------------------------------------------
 
-### With [Vercel](https://vercel.com)
-
-Install `vercel` if you haven't already:
-
-```bash
-npm install -g vercel
-```
-
-Then, from within your project folder:
-
-```bash
-cd public
-vercel deploy --name my-project
-```
-
-### With [surge](https://surge.sh/)
-
-Install `surge` if you haven't already:
-
-```bash
-npm install -g surge
-```
-
-Then, from within your project folder:
-
-```bash
-npm run build
-surge public my-project.surge.sh
-```
+documentation & tutorial : [https://www.hockeycomputindo.com/2021/10/svelte-bulma-website-template-themes.html](https://www.hockeycomputindo.com/2021/10/svelte-bulma-website-template-themes.html)
