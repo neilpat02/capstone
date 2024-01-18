@@ -1,7 +1,7 @@
 <script>
 	import Footer from "./widget/Footer.svelte";
 </script>
-<section class="hero is-success is-fullheight">
+<section class="hero is-danger is-fullheight">
 	<div class="hero-head">
 	  <header class="navbar">
 		<div class="container">
@@ -10,32 +10,37 @@
 	</div>
   	<div class="hero-body">
 	  <div class="container has-text-centered">
-		<p class="title"> Whatsapp <br/><i class="fab fa-whatsapp fa-4x"></i><br/> Shop
-		</p>
-		<p class="subtitle">
-		  Online Order Whatsapp Shop
-		</p>
+		<p class="title">
+			UGA Maze Competition
+		  </p>
+		  <p class="subtitle">
+			<img src="/HeRoLab.png" alt="HeRo Lab logo"/>
+		  </p>
 	  </div>
 	</div>
   </section>
 <section class="section">
     <div class="container">
       <h1 class="title">
-       Toko Online Whatsapp
+       What is the UGA Maze Competition?
       </h1>
       <p class="subtitle">
-        Kini saat nya manjakan dirimu dengan toko online shop order intergasi whatsapp
+        The UGA Maze Competition is a competition that will allow students to compete against each other in a 2D maze.
       </p>
 	  <div class="tile is-ancestor">
 		<div class="tile is-vertical is-8">
 		  <div class="tile">
 			<div class="tile is-parent is-vertical">
 			  <article class="tile is-child notification is-primary">
-				<p class="title">Shop</p>
+				<p class="title">Why This Matters:</p>
 				<figure class="image is-4by3">
 				<img src="https://whatshop.vercel.app/static/a7886685025b75097793170323414066/9f7bd/shop.avif" alt="toko online whatsapp"/>
 			</figure>
-				<p class="subtitle">Toko online shop ready dengan domain mu.</p>
+				<p class="subtitle">Our project holds immense relevance in the realm of autonomous navigation. While 
+					our primary focus is on maze-solving, our vision extends far beyond this initial 
+					challenge. By demonstrating proof of concept, we aim to validate advanced algorithms 
+					that can revolutionize autonomous vehicle navigation, path planning in logistics, 
+					and warehousing.</p>
 			  </article>
 			  <article class="tile is-child notification is-warning">
 				<p class="title">CMS</p>
@@ -47,13 +52,17 @@
 			</div>
 			<div class="tile is-parent">
 			  <article class="tile is-child notification is-info">
-				<p class="title">Whatsapp</p>
-				<p class="subtitle">Integrasi dengan whatsapp mu.</p>
+				<p class="title">Our Vision</p>
+				<p class="subtitle">Looking to the future.</p>
 				<figure class="image is-4by3">
 				  <img src="https://whatshop.vercel.app/static/568c9beabe4e610d0ec43592df11d74c/9f7bd/webs.avif" alt="toko online whatsapp">
 				</figure>
-				<p class="subtitle">Toko online shop yang dirancang khusus untuk whatsapp , kemudahan kalkulasi order otomatis hingga proses transaksi atau tata cara pembayaran yang lengkap memudahkan pelanggan untuk order dengan cepat dengan proses checkout ke whatapp mu langsung.</p>
-				<p class="subtitle">Include dengan dukungan nama domain untuk usaha dan bisnis mu , semakin sempurna dalam menggunakan whatsapp shop ini.</p>
+				<p class="subtitle">Dedicated to fueling innovation, we present a unique competition 
+					testbed aimed at inspiring breakthroughs in algorithms and robotics. This dynamic 
+					platform challenges brilliant minds to create and test maze-solving algorithms and 
+					groundbreaking robotic designs, paving the way for the future of autonomous systems.</p>
+				<p class="subtitle">Beyond the competition, we foster continuous learning and collaboration, 
+					creating a vibrant community poised to shape the technological landscape.</p>
 			  </article>
 			</div>
 		  </div>
@@ -70,13 +79,20 @@
 		<div class="tile is-parent">
 		  <article class="tile is-child notification is-danger">
 			<div class="content">
-			  <p class="title">A Premium</p>
-			  <p class="subtitle">Sempurnakan dengan POS Apps.</p>
+			  <p class="title">Our Journey</p>
+			  <p class="subtitle">Through a modern world.</p>
 			  <figure class="image is-4by3">
 				<img src="https://whatshop.vercel.app/static/a6e48324a165407847d89e3bd09b5079/9f7bd/qris.avif" alt="toko online whatsapp">
 			  </figure>
-			  <p class="subtitle">Integrasi dengan point of sale apps, aplikasi kasir toko dan restoran dan disesuaikan dengan bidang bisnis mu terintegrasi secara sempurna dengan whatsapp shop akan menjadi lebih baik dalam proses pencatatan pembukuan, melakukan transaksi kasir dengan mudah dan cepat via mesin kasir plus cetak struk kasir serta monitoring omset pendapatan detail akan mendukung mobilitas mu bekerja , dengan whatshop satu aplikasi untuk semua nya.</p>
-			  <p class="subtitle">Saat nya kini revolusi bisnis mu dengan whatshop aplikasi lengkap dan murah untuk mu.</p>
+			  <p class="subtitle">In a world driven by groundbreaking technology, 
+				the possibilities for innovation are limitless. Our project is at the 
+				forefront of this exciting journey, focusing on the dynamic intersection 
+				of autonomous navigation, AI, algorithmic development, and robotics engineering.</p>
+			  <p class="subtitle">As we delve into the heart of this multifaceted journey, our 
+				pursuit extends beyond the conventional boundaries, reaching into the uncharted 
+				territories of possibility. Fueled by an unwavering commitment to pushing the 
+				limits of what can be achieved, we strive to unlock new dimensions of creativity 
+				and ingenuity.</p>
 			  <div class="content">
 				<!-- Content -->
 			  </div>
