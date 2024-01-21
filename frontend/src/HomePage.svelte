@@ -31,10 +31,10 @@
 		<div class="tile is-vertical is-8">
 		  <div class="tile">
 			<div class="tile is-parent is-vertical">
-			  <article class="tile is-child notification is-primary">
+			  <article class="tile is-child notification is-black">
 				<p class="title">Why This Matters:</p>
 				<figure class="image is-4by3">
-				<img src="https://whatshop.vercel.app/static/a7886685025b75097793170323414066/9f7bd/shop.avif" alt="toko online whatsapp"/>
+				<img src="/wrench.png" alt="wrench in curly braces"/>
 			</figure>
 				<p class="subtitle">Our project holds immense relevance in the realm of autonomous navigation. While 
 					our primary focus is on maze-solving, our vision extends far beyond this initial 
@@ -42,20 +42,26 @@
 					that can revolutionize autonomous vehicle navigation, path planning in logistics, 
 					and warehousing.</p>
 			  </article>
-			  <article class="tile is-child notification is-warning">
-				<p class="title">CMS</p>
-				<figure class="image is-4by3">
-				<img src="https://whatshop.vercel.app/static/2b3a77900025009d10effbae5ed33745/9f7bd/wo.avif" alt="toko online whatsapp"/>
-			</figure>
-				<p class="subtitle">Content Management System Web admin dashboard.</p>
-			  </article>
+			  <article class="tile is-child notification is-danger">
+				<p class="title">Scoring</p>
+				<p style="font-weight: bold;">Maze Mapping:</p>
+				<ul class="bullet-list">
+					<li>Accuracy: +50, +30, +10 points</li>
+					<li>Mapping Speed: +30, +20, +10 points</li>
+				</ul>
+				<p style="font-weight: bold;">Penalties:</p>
+				<ul class="bullet-list">
+					<li>Touch Penalty: -10 points</li>
+					<li>Crash Penalty: -10 points</li>
+				</ul>
+			</article>
 			</div>
 			<div class="tile is-parent">
-			  <article class="tile is-child notification is-info">
+			  <article class="tile is-child notification is-gray">
 				<p class="title">Our Vision</p>
 				<p class="subtitle">Looking to the future.</p>
 				<figure class="image is-4by3">
-				  <img src="https://whatshop.vercel.app/static/568c9beabe4e610d0ec43592df11d74c/9f7bd/webs.avif" alt="toko online whatsapp">
+				  <img src="/Robot Maze Final.PNG" alt="Robot Maze Final">
 				</figure>
 				<p class="subtitle">Dedicated to fueling innovation, we present a unique competition 
 					testbed aimed at inspiring breakthroughs in algorithms and robotics. This dynamic 
@@ -67,9 +73,9 @@
 			</div>
 		  </div>
 		  <div class="tile is-parent">
-			<article class="tile is-child notification is-success">
-			  <p class="title">All in one Apps</p>
-			  <p class="subtitle">Dan semua nya di hanlde dalam satu applikasi saja untuk mu.</p>
+			<article class="tile is-child notification is-black">
+			  <p class="title">The Team</p>
+			  <p class="subtitle">Neil Patel, George Tharpe, Evan Culbertson, Sean Payne, Mrudang Patel</p>
 			  <div class="content">
 				<!-- Content -->
 			  </div>
@@ -81,8 +87,8 @@
 			<div class="content">
 			  <p class="title">Our Journey</p>
 			  <p class="subtitle">Through a modern world.</p>
-			  <figure class="image is-4by3">
-				<img src="https://whatshop.vercel.app/static/a6e48324a165407847d89e3bd09b5079/9f7bd/qris.avif" alt="toko online whatsapp">
+			  <figure class="image is-2by1">
+				<img src="/UGAg.png" alt="UGA G">
 			  </figure>
 			  <p class="subtitle">In a world driven by groundbreaking technology, 
 				the possibilities for innovation are limitless. Our project is at the 
@@ -104,3 +110,10 @@
   </section>
 
 <Footer/>
+
+<style>
+	.bullet-list {
+		list-style-type: disc;
+		margin-left: 20px; /* Adjust the indentation as needed */
+	}
+</style>

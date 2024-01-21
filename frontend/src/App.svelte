@@ -5,7 +5,10 @@
 	import LeaderBoard from "./LeaderBoard.svelte";
 	import Pricing from "./Pricing.svelte";
 	import Contact from "./Contact.svelte";
+
 	export let menu = 1;
+
+	
 </script>
 <nav id="menu" class="navbar" role="navigation" aria-label="main navigation">
 	<div class="navbar-brand">

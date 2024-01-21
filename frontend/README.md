@@ -1,39 +1,40 @@
-# Bulma Svelte website themes template
+# Project Setup
 
-[Demo Svelte Bulma →](https://whatsappshop.vercel.app/)
+## Credentials
+Gmail:
+* user: mazecomphero@gmail.comp
+* password: HeRoLab!
 
-documentation & tutorial : [https://www.hockeycomputindo.com/2021/10/svelte-bulma-website-template-themes.html](https://www.hockeycomputindo.com/2021/10/svelte-bulma-website-template-themes.html)
-
-[Demo Video Svelte Bulma →](https://www.youtube.com/watch?v=EgoBaJ3TRyk)
-
-<a href="https://www.buymeacoffee.com/axcora"><img width="240" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgIA9HMwkK8kr7uRwVNxnhXsLQsJHxQQYVSzqCAaK58OpJOiTlzbIX7eEwS_VpJ3oEG-xrmVEl2WKqGvB_o-KjyBGTbbjFHM_bN2Jce9g3FTnt2ZJViwcvB9DHPOKPEMCl7jTQRVWKPw_ETloH7_CK8Xr09SSNNx22xnfGjViwdEsGtR-yGrLmr-JUGHA/s1090/bmc-button.png"/></a>
-
-
-![new svelte bulma website template themes](https://1.bp.blogspot.com/-CD6tI-9RqDE/YXDU71anyWI/AAAAAAAARaM/ppGnt_Ob0tce3gR3INp6VVLe_Q9UGG_ewCLcBGAsYHQ/s2048/svelte%2Bbuma%2Btemplate%2B%25281%2529.png)
-
-Home page 
+MongoDB Atlas:
+* user: mazecomphero
+* password: AgdHtQsZAmsW2wQu
 
 
-![new svelte bulma website template themes](https://1.bp.blogspot.com/-KUyZCbF18xs/YXDU7TIX1bI/AAAAAAAARaI/sEM3-l-VS1EWUvXQ9ZGqzVy-jOK2ydWwQCLcBGAsYHQ/s671/svelte%2Bbuma%2Btemplate%2B%25282%2529.png)
+# Project Tech Stack
 
-Mobile view
+## Languages
+Programming language utilized for the frontend include: HTML, CSS, JavaScript. As for backend the language being used is JavaScript.
 
-![new svelte bulma website template themes](https://1.bp.blogspot.com/-Ree78uiBzKw/YXDU8AeW77I/AAAAAAAARaQ/V098lw1XGyEeNVIdmO2WjAdqrs9u5um8QCLcBGAsYHQ/s1450/svelte%2Bbuma%2Btemplate%2B%25283%2529.png)
 
-Example page with image
+## Frameworks
+- Svelte
 
-![new svelte bulma website template themes](https://1.bp.blogspot.com/-mxP4Fec8_w4/YXDU-W1q0xI/AAAAAAAARaY/kNIrOfDns5M2FaErmDkeV11ybtOj11msgCLcBGAsYHQ/s1801/svelte%2Bbuma%2Btemplate%2B%25285%2529.png)
+## Data Management System
+- MongoDB (non-SQL JSON)
 
-Other page with video
+## Version Control
+The project is incorporated via GitHub. Version history, changes, requests can all be accessed/made by every member or interested party. It is a private repository. 
 
------------------------------------------------
+## Security
+Passwords and other important personal information are encrypted in order to ensure that users are protected.
 
-### Buy me a coffee :hearts: ✌🏻
+# Project Background
+The basis of the project is a Maze Competition that utilizes robotics. A website is associated with the competition as a way for interested parties and competitors to test their algorithms and compete in a virtual manner. Users can post their times on a leaderboard to compete with other users doing the same. 
 
-:coffee: :coffee: :coffee: 
 
-<a href="https://www.buymeacoffee.com/axcora"><img width="240" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgIA9HMwkK8kr7uRwVNxnhXsLQsJHxQQYVSzqCAaK58OpJOiTlzbIX7eEwS_VpJ3oEG-xrmVEl2WKqGvB_o-KjyBGTbbjFHM_bN2Jce9g3FTnt2ZJViwcvB9DHPOKPEMCl7jTQRVWKPw_ETloH7_CK8Xr09SSNNx22xnfGjViwdEsGtR-yGrLmr-JUGHA/s1090/bmc-button.png"/></a>
-
-----------------------------------------------
-
-documentation & tutorial : [https://www.hockeycomputindo.com/2021/10/svelte-bulma-website-template-themes.html](https://www.hockeycomputindo.com/2021/10/svelte-bulma-website-template-themes.html)
+# Project Creators
+- Neil Patel
+- George Tharpe
+- Mrudang Patel
+- Evan Culbertson
+- Sean Payne
