@@ -1,4 +1,4 @@
-<section class="hero is-medium is-danger has-text-centered">
+<section class="hero is-small is-danger has-text-centered">
 	<div class="hero-body">
 	  <p class="title">
 		UGA Maze Competition

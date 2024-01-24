@@ -1,9 +1,9 @@
 <script>
+  import { createEventDispatcher } from 'svelte';
   import Footer from "./widget/Footer.svelte";
   import Navi from "./widget/Navi.svelte";
-  
 
-  // Variables and function from the old LoginPage
+  const dispatch = createEventDispatcher();
   let email = '';
   let password = '';
   let loginMessage = '';
@@ -15,30 +15,26 @@
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({email, password}),
-        
+        body: JSON.stringify({ email, password }),
       });
 
       const result = await response.json();
 
       if (response.ok) {
         loginMessage = "Login successful";
-        window.location.href = '/';
-
-        
-        //later we need to redirect the user 
+        dispatch('login'); // Dispatch event for successful login
       } else {
-        loginMessage = "Error: ${result.message}";
+        loginMessage = `Error: ${result.message}`;
         alert(`Error: ${result.message}`);
-
       }
+    } catch (error) {
+      loginMessage = `Error: ${error.message}`;
+      alert(`Error Occurred: ${error.message}`);
     }
-    catch (error) {
-        loginMessage = "Error: ${error.message}";
-        alert(`Error Occurred: ${error.message}`);
-    }
+  }
 
-    
+  function handleForgotPassword() {
+    // Forgot Password Logic
   }
 </script>
 

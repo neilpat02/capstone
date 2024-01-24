@@ -2,12 +2,16 @@
 
 ## Credentials
 Gmail:
-* user: mazecomphero@gmail.comp
+* user: mazecomphero@gmail.com
 * password: HeRoLab!
 
 MongoDB Atlas:
 * user: mazecomphero
 * password: AgdHtQsZAmsW2wQu
+
+EMAILJS:
+* user: mazecomphero@gmail.com
+* password: HeRoLab! 
 
 
 # Project Tech Stack

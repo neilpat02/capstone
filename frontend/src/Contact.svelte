@@ -1,16 +1,68 @@
 <script>
 	import Footer from "./widget/Footer.svelte";
 	import Navi from "./widget/Navi.svelte";
+	import emailjs from 'emailjs-com';
+
+	let email = "";
+	let message = "";
+
+	const handleSubmit = async () => {
+		try {
+		// Use your EmailJS template and service ID
+		const templateParams = {
+			from_email: email,
+			to_email: 'mazecomphero@gmail.com',
+			message: message,
+		};
+
+		await emailjs.send('service_k9n8u89', 'template_z8jhgxg', templateParams, 'KuOnXFzA41_K7TY1A');
+
+		alert('Email sent successfully!');
+		} catch (error) {
+		console.error('Error sending email:', error);
+		alert('Error sending email. Please try again.');
+		}
+	};
 </script>
+
 <Navi/>
-<div class="container p-5">
-	<div class="content">
-		<h1>Contact</h1>
-		<figure class="image is-16by9">
-            <img src="https://1.bp.blogspot.com/-3uU4-F2UHC0/YXBuFlUWq-I/AAAAAAAARaA/Ykp39LQzUDg1yUOIb_bsBD9jHYJFOQxXwCLcBGAsYHQ/s1920/16.jpg" alt="toko online whatsapp">
-          </figure>
-		  <p>Dan hubungi kami jika butuh bantuan informasi maupun konsultasi</p>
-		  <a href="https://wa.me/62895339403223" class="button is-primary">Whatsapp</a> <a href="tel:+62895339403223" class="button is-primary">Call Us</a> <a href="mailto:axcora@gmail.com" class="button is-primary">Email</a> 
+  <section class="section">
+	<div class="container">
+	  <h1 class="title">Contact Us</h1>
+	  <div class="columns">
+		<div class="column is-half">
+		  <form on:submit|preventDefault={handleSubmit}>
+			<div class="field">
+			  <label class="label">Email</label>
+			  <div class="control">
+				<input
+				  class="input is-danger"
+				  type="email"
+				  placeholder="Enter your email"
+				  bind:value={email}
+				/>
+			  </div>
+			</div>
+  
+			<div class="field">
+			  <label class="label">Message</label>
+			  <div class="control">
+				<textarea
+				  class="textarea is-danger"
+				  placeholder="Type your message"
+				  bind:value={message}
+				></textarea>
+			  </div>
+			</div>
+  
+			<div class="field">
+			  <div class="control">
+				<button class="button is-danger">Submit</button>
+			  </div>
+			</div>
+		  </form>
 		</div>
-  </div>
+	  </div>
+	</div>
+  </section>
 <Footer/>
