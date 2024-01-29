@@ -33,9 +33,34 @@
     }
   }
 
-  function handleForgotPassword() {
-    // Forgot Password Logic
-  }
+  
+  
+
+  const handleForgotPassword = async () => {
+  try {
+      const response = await fetch('http://localhost:3000/api/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        loginMessage = "Email sent";
+        alert("Email sent");
+      } else {
+        loginMessage = `Error: ${result.message}`;
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      loginMessage = `Error: ${error.message}`;
+      alert(`Error Occurred: ${error.message}`);
+    }
+      
+  };
 </script>
 
 <Navi/>

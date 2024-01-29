@@ -2,10 +2,12 @@
 <script>
 	import Footer from "./widget/Footer.svelte";
 	import Navi from "./widget/Navi.svelte";
+    import { createEventDispatcher } from 'svelte';
     let teamName = '';
     let email = '';
     let password = '';
-
+    const dispatch = createEventDispatcher();
+    
     async function handleSubmit() {
         try {
             const response = await fetch('http://localhost:3000/api/signup', {
@@ -20,6 +22,7 @@
 
             if (response.ok) {
                 alert("Sign Up Successful!")
+                dispatch('login');
             } else {
                 alert("Error: ${result.message}")
             }
@@ -27,6 +30,9 @@
             alert("Error Occured: ${error.message}")
         }
     }
+
+
+
 </script>
 
 <Navi/>

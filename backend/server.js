@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const User = require('./User');
+const nodemailer = require('nodemailer');
+
 
 const app = express();
 const saltRounds = 10;
@@ -63,6 +65,63 @@ app.post('/api/login', async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   });
+
+  app.post('/api/forgot-password', async (req, res) => {
+    const { email } = req.body;
+  
+    try {
+      // Check if the email exists in the database
+      const user = await User.findOne({ email });
+  
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      // Generate a random token for password reset
+      const resetToken = crypto.randomBytes(20).toString('hex');
+  
+      // Save the reset token and expiration time in the user document
+      user.resetToken = resetToken;
+      user.resetTokenExpiration = Date.now() + 3600000; // Token is valid for 1 hour
+  
+      await user.save();
+  
+      // Send an email to the user with the reset link
+      sendResetEmail(email, resetToken);
+  
+      res.status(200).json({ message: 'Password reset link sent to your email.' });
+    } catch (error) {
+      console.error('Error during forgot password:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  const sendResetEmail = (toEmail, resetToken) => {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'mazecomphero@gmail.com',
+        pass: '',
+      },
+    });
+  
+    const resetLink = `http://your-frontend-url/reset-password?token=${resetToken}`;
+  
+    const mailOptions = {
+      from: 'mazecomphero@gmail.com',
+      to: toEmail,
+      subject: 'Password Reset',
+      text: `Click the following link to reset your password: ${resetLink}`,
+    };
+  
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending reset email:', error);
+      } else {
+        console.log('Reset email sent:', info.response);
+      }
+    });
+  };
 
 // Start the server
 const PORT = process.env.PORT || 3000;
