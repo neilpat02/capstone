@@ -123,6 +123,15 @@ app.post('/api/login', async (req, res) => {
     });
   };
 
+  app.get('/api/leaderboard', async (req, res) => {
+    try {
+        const leaderboardData = await User.find().sort({ score: -1 });
+        res.status(200).json(leaderboardData);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

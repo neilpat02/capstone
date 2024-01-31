@@ -1,16 +1,28 @@
 <script>
   import Footer from "./widget/Footer.svelte";
   import Navi from "./widget/Navi.svelte";
+  import { onMount } from 'svelte';
 
   // Temporary sample data (from old component)
-  const leaderboardData = [
-      {teamName: 'Team Alpha', score: 150},
-      {teamName: 'Team Beta', score: 100},
-      {teamName: 'Team Gamma', score: 50}
-  ];
+  //const leaderboardData = [
+  //    {teamName: 'Team Alpha', score: 150},
+  //    {teamName: 'Team Beta', score: 100},
+  //   {teamName: 'Team Gamma', score: 50}
+  //];
+  let leaderboardData = [];
 
-  // Future MongoDB fetch logic placeholder (from old component)
-  //... {add code here to fetch data}
+  onMount(async () => {
+      try {
+          const response = await fetch('http://localhost:3000/api/leaderboard');
+          if (response.ok) {
+              leaderboardData = await response.json();
+          } else {
+              console.error('Error fetching leaderboard data');
+          }
+      } catch (error) {
+          console.error('Error:', error);
+      }
+  });
 </script>
 
 <Navi/>
