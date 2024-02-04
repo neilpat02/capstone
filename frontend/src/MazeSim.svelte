@@ -14,6 +14,10 @@
 </script>
 
 <Navi/>
+<div class="button-container-top">
+  <button class="thin-button-top">Software</button>
+  <button class="thin-button-top">Hardware</button>
+</div>
 
 <div class="container is-flex is-justify-content-center is-align-items-center is-square">
   <section class="section">
@@ -30,60 +34,79 @@
   </section>
 </div>
 
-<div class="container is-flex is-justify-content-left is-align-items-center is-button-container">
-  <div class="button">FILE</div>
-  <div class="button">SAVE</div>
-  <div class="button">RUN</div>
+<div class="button-container">
+  <button class="thin-button">File</button>
+  <button class="thin-button">Save</button>
+  <button class="thin-button">RUN</button>
+  <button class="thin-button-left">Upload to the bot</button>
 </div>
+
 
 <div class="content">
-  
     <AceEditor bind:value={editorText} />
-
 </div>
 
-<div class="container is-flex is-justify-content-left is-align-items-center is-button-container">
-  <div class="button">UPLOAD</div>
-</div>
 
 <Footer/>
 
 <style>
+  .button-container-top {
+    display: flex;
+    width: calc(100% - 4rem); /* Subtract 2rem on both sides for left and right margins */
+    margin: 0 2rem;
+  }
+
+  .thin-button-top {
+    flex: 1; /* Make each button take up equal width */
+    margin: 0; /* Remove default margin */
+    padding: 5px 10px; /* Adjust padding for your desired thickness */
+    border: none; /* Remove border */
+    background-color: #B71234; /* Set background color */
+    color: #fff; /* Set text color */
+    cursor: pointer;
+  }
+
+  .button-container {
+    display: flex;
+    margin-left: 2rem;
+  }
+
+  .thin-button {
+    margin: 0; /* Remove default margin */
+    padding: 5px 10px; /* Adjust padding for your desired thickness */
+    border: none; /* Remove border */
+    background-color: #B71234; /* Set background color */
+    color: #fff; /* Set text color */
+    cursor: pointer;
+  }
+  .thin-button-left{
+    margin: 0 2rem; /* Remove default margin */
+    padding: 5px 10px; /* Adjust padding for your desired thickness */
+    border: none; /* Remove border */
+    background-color: #B71234; /* Set background color */
+    color: #fff; /* Set text color */
+    cursor: pointer;
+    margin-left: auto;
+    
+  }
+
   /* Styles for the overall layout */
   .is-square {
     height: 70vh; /* Adjusted for larger size */
     background-color: lightgray;
-    margin-top: 2rem;
+    
   }
 
-  .is-button-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    margin-top: 2rem;
-  }
 
   .content {
-    padding: 20px;
+    margin: 0 2rem 0 2rem;
   }
 
-  .button {
-    width: 100px;
-    height: 100px;
-    margin: 10px;
-    background-color: #B71234;
-    border-radius: 10px;
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
+  
+  .thin-button:hover {
+    background-color: gray;
   }
-
-  .button:hover {
+  .thin-button-top:hover {
     background-color: gray;
   }
 
