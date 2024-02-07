@@ -9,37 +9,96 @@
   let robotRow = 0;
   let robotCol = 0;
   const mazeSize = 16;
+  const userId = $userId; // Ensure you have a way to access the logged-in user's ID
   let maze = Array.from({ length: mazeSize }, () => new Array(mazeSize).fill(0));
   maze[robotRow][robotCol] = 1; // Place robot in the maze
+
+  let showSoftware = true;
+  function toggleSection() {
+    showSoftware = !showSoftware;
+  }
+
+  function uploadToBot() {
+    // Your upload logic goes here
+    console.log('Uploading to the bot...');
+  }
+
+  async function saveText() {
+    const fileName = prompt('Enter the name of the file:');
+    if (!fileName) {
+      alert('Save cancelled.');
+      return;
+    }
+
+    try {
+      const content = editorText;
+      
+      const response = await fetch('/api/save-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, fileName, content })
+      });
+
+      if (response.ok) {
+        alert('File saved successfully.');
+      } else {
+        const error = await response.json();
+        alert(`Failed to save file: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Error saving file:', error);
+      alert('Failed to save file.');
+    }
+  }
 </script>
 
 <Navi/>
 <div class="button-container-top">
-  <button class="thin-button-top">Software</button>
-  <button class="thin-button-top">Hardware</button>
+  <button class="thin-button-top" on:click={toggleSection}>Software</button>
+  <button class="thin-button-top" on:click={toggleSection}>Hardware</button>
 </div>
 
-<div class="container is-flex is-justify-content-center is-align-items-center is-square">
-  <section class="section">
-    <div class="has-text-centered">
-      <h1 class="title is-1">Maze Simulator</h1>
-    </div>
-    <div class="maze">
-      {#each maze as row, i}
-        {#each row as cell, j}
-          <div class="maze-cell {cell === 1 ? 'robot' : ''}"></div>
+{#if showSoftware}
+  <div class="container is-flex is-justify-content-center is-align-items-center is-square" id="software-section">
+    <section class="section">
+      <div class="has-text-centered">
+        <h1 class="title is-1">Maze Simulator</h1>
+      </div>
+      <div class="maze">
+        {#each maze as row, i}
+          {#each row as cell, j}
+            <div class="maze-cell {cell === 1 ? 'robot' : ''}"></div>
+          {/each}
         {/each}
-      {/each}
-    </div>
-  </section>
-</div>
+      </div>
+    </section>
+  </div>
+  <div class="button-container">
+    <button class="thin-button">File</button>
+    <button class="thin-button">Save</button>
+    <button class="thin-button-left">RUN</button>
+  </div>
+{/if}
 
-<div class="button-container">
-  <button class="thin-button">File</button>
-  <button class="thin-button">Save</button>
-  <button class="thin-button">RUN</button>
-  <button class="thin-button-left">Upload to the bot</button>
-</div>
+{#if !showSoftware}
+  <div class="container is-flex is-justify-content-center is-align-items-center is-square" id="hardware-section">
+    <section class="section hardware-section">
+      <div style="background: darkgray;"class="has-text-centered">
+        <h1 class="title is-1">Hardware Section</h1>
+        <!-- Add your hardware-related content here -->
+      </div>
+    </section>
+  </div>
+  <div class="button-container">
+    <button class="thin-button">File</button>
+    <button class="thin-button">Save</button>
+    <button class="thin-button-left" on:click={uploadToBot}>Upload to bot</button>
+  </div>
+  
+{/if}
+
 
 
 <div class="content">

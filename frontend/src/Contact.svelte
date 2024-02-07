@@ -25,15 +25,24 @@
 	};
 </script>
 
-<Navi/>
+<section class="hero is-small has-text-centered">
+    <div class="hero-body">
+        <p class="title" style="color: white">
+            UGA Maze Competition
+        </p>
+        <p class="subtitle">
+            <img src="/HeRoLab.png" alt="HeRo Lab logo"/>
+        </p>
+    </div>
+</section>
   <section class="section">
 	<div class="container">
-	  <h1 class="title">Contact Us</h1>
+	  <h1 style="color: white" class="title">Contact Us</h1>
 	  <div class="columns">
 		<div class="column is-half">
 		  <form on:submit|preventDefault={handleSubmit}>
 			<div class="field">
-			  <label class="label">Email</label>
+			  <label style="color: white" class="label">Email</label>
 			  <div class="control">
 				<input
 				  class="input is-danger"
@@ -45,7 +54,7 @@
 			</div>
   
 			<div class="field">
-			  <label class="label">Message</label>
+			  <label style="color: white" class="label">Message</label>
 			  <div class="control">
 				<textarea
 				  class="textarea is-danger"
@@ -57,7 +66,7 @@
   
 			<div class="field">
 			  <div class="control">
-				<button class="button is-danger">Submit</button>
+				<button style="color: white; background: gray;" class="button">Submit</button>
 			  </div>
 			</div>
 		  </form>
@@ -65,4 +74,15 @@
 	  </div>
 	</div>
   </section>
-<Footer/>
+
+  <div class="content has-text-centered">
+    <p style="color: white">
+      UGA Maze Competition Offical Site 
+    </p>
+  </div>
+
+<style>
+.content {
+        padding: 20px; 
+    }
+</style>

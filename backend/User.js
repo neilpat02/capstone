@@ -15,7 +15,11 @@ const userSchema = new mongoose.Schema({
         required: true
     },
 
-    score: {
+    softwareScore: {
+        type: Number,
+        default: 10
+    },
+    hardwareScore: {
         type: Number,
         default: 0
     }

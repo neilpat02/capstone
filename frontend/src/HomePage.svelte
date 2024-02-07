@@ -57,14 +57,14 @@
                         </article>
                     </div>
                     <div class="tile is-parent">
-                        <article class="tile is-child notification is-gray">
-                            <p class="title">Our Vision</p>
-                            <p class="subtitle">Looking to the future.</p>
+                        <article class="tile is-child notification is-darkgray">
+                            <p style="color: black"class="title">Our Vision</p>
+                            <p style="color: black"class="subtitle">Looking to the future.</p>
                             <figure class="image is-4by3">
                                 <img src="/Robot Maze Final.PNG" alt="Robot Maze Final">
                             </figure>
-                            <p class="subtitle">Dedicated to fueling innovation, we present a unique competition testbed aimed at inspiring breakthroughs in algorithms and robotics. This dynamic platform challenges brilliant minds to create and test maze-solving algorithms and groundbreaking robotic designs, paving the way for the future of autonomous systems.</p>
-                            <p class="subtitle">Beyond the competition, we foster continuous learning and collaboration, creating a vibrant community poised to shape the technological landscape.</p>
+                            <p style="color: black"class="subtitle">Dedicated to fueling innovation, we present a unique competition testbed aimed at inspiring breakthroughs in algorithms and robotics. This dynamic platform challenges brilliant minds to create and test maze-solving algorithms and groundbreaking robotic designs, paving the way for the future of autonomous systems.</p>
+                            <p style="color: black"class="subtitle">Beyond the competition, we foster continuous learning and collaboration, creating a vibrant community poised to shape the technological landscape.</p>
                         </article>
                     </div>
                 </div>
@@ -98,9 +98,17 @@
     </div>
 </section>
 
-<Footer/>
+
+<div class="content has-text-centered">
+    <p>
+      UGA Maze Competition Offical Site 
+    </p>
+  </div>
 
 <style>
+    .content {
+        padding: 20px; 
+    }
     :global(body), :global(html) {
         height: 100%;
         margin: 0;
