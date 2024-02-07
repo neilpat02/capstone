@@ -61,7 +61,7 @@
 </div>
 
 {#if showSoftware}
-  <div class="container is-flex is-justify-content-center is-align-items-center is-square" id="software-section">
+  <div class="is-flex is-justify-content-center is-align-items-center is-square" id="software-section">
     <section class="section">
       <div class="has-text-centered">
         <h1 class="title is-1">Maze Simulator</h1>
@@ -83,7 +83,7 @@
 {/if}
 
 {#if !showSoftware}
-  <div class="container is-flex is-justify-content-center is-align-items-center is-square" id="hardware-section">
+  <div class="is-flex is-justify-content-center is-align-items-center is-square" id="hardware-section">
     <section class="section hardware-section">
       <div style="background: darkgray;"class="has-text-centered">
         <h1 class="title is-1">Hardware Section</h1>
@@ -106,7 +106,11 @@
 </div>
 
 
-<Footer/>
+<div style=""class="content has-text-centered">
+  <p style="color: white">
+    UGA Maze Competition Offical Site 
+  </p>
+</div>
 
 <style>
   .button-container-top {
@@ -153,7 +157,8 @@
   .is-square {
     height: 70vh; /* Adjusted for larger size */
     background-color: lightgray;
-    
+    width: calc(100% - 4rem); /* Subtract 2rem on both sides for left and right margins */
+    margin: 0 2rem;
   }
 
 

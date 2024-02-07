@@ -75,14 +75,9 @@
 	</div>
   </section>
 
-  <div class="content has-text-centered">
+  <div style="padding: 20px" class="has-text-centered">
     <p style="color: white">
       UGA Maze Competition Offical Site 
     </p>
   </div>
 
-<style>
-.content {
-        padding: 20px; 
-    }
-</style>
