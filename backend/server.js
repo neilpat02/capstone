@@ -5,6 +5,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const User = require('./User');
 const nodemailer = require('nodemailer');
+const SavedFile = require('./SavedFile'); // Import the SavedFile model
 
 
 const app = express();
@@ -66,6 +67,25 @@ app.post('/api/login', async (req, res) => {
     }
   });
 
+  // Assuming you have middleware to authenticate and set the user
+  app.post('/api/save-file', async (req, res) => {
+    try {
+      const { userId, fileName, content } = req.body;
+
+      // Create a new saved file document
+      const newFile = new SavedFile({
+        userId,
+        fileName,
+        content
+      });
+
+      await newFile.save();
+      res.status(201).json({ message: 'File saved successfully' });
+    } catch (error) {
+      console.error('Error saving file:', error);
+      res.status(500).json({ message: 'Failed to save file' });
+    }
+  });
   app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
   
@@ -96,6 +116,7 @@ app.post('/api/login', async (req, res) => {
     }
   });
 
+
   const sendResetEmail = (toEmail, resetToken) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -124,13 +145,21 @@ app.post('/api/login', async (req, res) => {
   };
 
   app.get('/api/leaderboard', async (req, res) => {
+    const { type } = req.query; // `type` can be 'software' or 'hardware'
     try {
-        const leaderboardData = await User.find().sort({ score: -1 });
+        let sortCriteria = {};
+        if (type === 'software') {
+            sortCriteria = { softwareScore: -1 };
+        } else if (type === 'hardware') {
+            sortCriteria = { hardwareScore: -1 };
+        }
+
+        const leaderboardData = await User.find().sort(sortCriteria);
         res.status(200).json(leaderboardData);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-});
+  });
 
 // Start the server
 const PORT = process.env.PORT || 3000;

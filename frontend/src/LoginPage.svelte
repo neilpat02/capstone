@@ -63,14 +63,23 @@
   };
 </script>
 
-<Navi/>
+<section class="hero is-small has-text-centered">
+  <div class="hero-body">
+      <p class="title" style="color: white">
+          UGA Maze Competition
+      </p>
+      <p class="subtitle">
+          <img src="/HeRoLab.png" alt="HeRo Lab logo"/>
+      </p>
+  </div>
+</section>
 
 <div class="container p-5">
   <div class="content">
-      <h1>Login</h1>
 
       <!-- Login form from the old LoginPage -->
       <div class="login-container">
+        <h3 style="color: gray">Login</h3>
           <form on:submit|preventDefault={handleSubmit}>
               <input type="email" bind:value={email} class="form-control" placeholder="Email" required>
               <input type="password" bind:value={password} class="form-control" placeholder="Password" required>
@@ -84,7 +93,11 @@
   </div>
 </div>
 
-<Footer/>
+<div style="padding: 20px" class="has-text-centered">
+  <p style="color: white">
+    UGA Maze Competition Offical Site 
+  </p>
+</div>
 
 <style> 
     .login-container {
