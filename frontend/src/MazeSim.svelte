@@ -2,65 +2,85 @@
   import Navi from "./widget/Navi.svelte";
   import Footer from "./widget/Footer.svelte";
   import AceEditor from "./widget/ace_builds.svelte";
-  
+  import { userEmail } from './userStore.js';
+
   let editorText = ""; // Placeholder for Text Editor content
+  let fileName = ""; // State for the file name
+  let isSaving = false; // State to control the display of input for file name and OK button
+  $: userCurrentEmail = $userEmail; // Reactive declaration for the current user email
 
   // Robot initial position and maze setup
   let robotRow = 0;
   let robotCol = 0;
   const mazeSize = 16;
-  const userId = $userId; // Ensure you have a way to access the logged-in user's ID
   let maze = Array.from({ length: mazeSize }, () => new Array(mazeSize).fill(0));
-  maze[robotRow][robotCol] = 1; // Place robot in the maze
+  maze[robotRow][robotCol] = 1; // Initializing robot's position in the maze
 
-  let showSoftware = true;
-  function toggleSection() {
-    showSoftware = !showSoftware;
+  let showSoftware = true; // State to toggle between software and hardware views
+
+  // Function to trigger the file name input and OK button for saving
+  function promptForFileName() {
+    isSaving = true; // Show input for file name and OK button
   }
 
-  function uploadToBot() {
-    // Your upload logic goes here
-    console.log('Uploading to the bot...');
-  }
-
+  // Function to handle the actual saving logic
   async function saveText() {
-    const fileName = prompt('Enter the name of the file:');
-    if (!fileName) {
-      alert('Save cancelled.');
+    if (!fileName.trim()) {
+      alert('File name is required.');
       return;
     }
 
     try {
-      const content = editorText;
-      
-      const response = await fetch('/api/save-file', {
+      const response = await fetch('http://localhost:3000/api/save-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId, fileName, content })
+        body: JSON.stringify({
+          userEmail: userCurrentEmail,
+          fileName,
+          content: editorText,
+        }),
       });
 
       if (response.ok) {
-        alert('File saved successfully.');
+        alert('Text saved successfully!');
+        fileName = ""; // Clear file name after successful save
+        isSaving = false; // Hide the input and OK button
       } else {
-        const error = await response.json();
-        alert(`Failed to save file: ${error.message}`);
+        const errorData = await response.json();
+        alert(`Failed to save text: ${errorData.message}`);
       }
     } catch (error) {
-      console.error('Error saving file:', error);
-      alert('Failed to save file.');
+      console.error('Error saving text:', error);
+      alert('Failed to save text due to an error.');
     }
+  }
+
+  // Toggle the software/hardware view
+  function toggleSection() {
+    showSoftware = !showSoftware;
+  }
+
+  // Placeholder function for future bot uploading logic
+  function uploadToBot() {
+    console.log('Uploading to the bot...');
   }
 </script>
 
 <Navi/>
+<!-- Display the logged-in user email -->
+<div class="logged-in-as">
+  Logged in as: {$userEmail}
+</div>
+
 <div class="button-container-top">
   <button class="thin-button-top" on:click={toggleSection}>Software</button>
   <button class="thin-button-top" on:click={toggleSection}>Hardware</button>
 </div>
 
 {#if showSoftware}
+  <!-- Software section -->
   <div class="is-flex is-justify-content-center is-align-items-center is-square" id="software-section">
     <section class="section">
       <div class="has-text-centered">
@@ -75,11 +95,20 @@
       </div>
     </section>
   </div>
-  <div class="button-container">
-    <button class="thin-button">File</button>
-    <button class="thin-button">Save</button>
-    <button class="thin-button-left">RUN</button>
-  </div>
+  <!-- Display file name input and OK button when isSaving is true -->
+  {#if isSaving}
+    <div class="file-name-input">
+      <input type="text" bind:value={fileName} placeholder="Enter file name here" />
+      <button on:click={saveText}>OK</button>
+    </div>
+  {:else}
+    <div class="button-container">
+      <button class="thin-button" on:click={promptForFileName}>Save</button>
+      <!-- Restore the File and Run buttons -->
+      <button class="thin-button">File</button>
+      <button class="thin-button">Run</button>
+    </div>
+  {/if}
 {/if}
 
 {#if !showSoftware}
@@ -99,10 +128,8 @@
   
 {/if}
 
-
-
 <div class="content">
-    <AceEditor bind:value={editorText} />
+  <AceEditor bind:value={editorText} />
 </div>
 
 

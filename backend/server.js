@@ -5,7 +5,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const User = require('./User');
 const nodemailer = require('nodemailer');
-const SavedFile = require('./SavedFile'); // Import the SavedFile model
+const SavedText = require('./SavedTexts'); // Adjust the path as needed
 
 
 const app = express();
@@ -67,25 +67,32 @@ app.post('/api/login', async (req, res) => {
     }
   });
 
-  // Assuming you have middleware to authenticate and set the user
-  app.post('/api/save-file', async (req, res) => {
+  app.post('/api/save-text', async (req, res) => {
+    const { userEmail, fileName, content } = req.body;
+  
     try {
-      const { userId, fileName, content } = req.body;
-
-      // Create a new saved file document
-      const newFile = new SavedFile({
-        userId,
+      // Optionally, check if the user exists in the User collection.
+      const userExists = await User.findOne({ email: userEmail });
+      if (!userExists) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      const newSavedText = new SavedText({
+        userEmail,
         fileName,
         content
       });
-
-      await newFile.save();
-      res.status(201).json({ message: 'File saved successfully' });
+  
+      await newSavedText.save();
+      res.status(201).json({ message: 'Text saved successfully' });
     } catch (error) {
-      console.error('Error saving file:', error);
-      res.status(500).json({ message: 'Failed to save file' });
+      console.error('Error saving text:', error);
+      res.status(500).json({ message: 'Failed to save text' });
     }
   });
+  
+
+
   app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
   

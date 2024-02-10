@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import Footer from "./widget/Footer.svelte";
   import Navi from "./widget/Navi.svelte";
+  import { userEmail } from './userStore.js';
 
   const dispatch = createEventDispatcher();
   let email = '';
@@ -23,6 +24,8 @@
       if (response.ok) {
         loginMessage = "Login successful";
         dispatch('login'); // Dispatch event for successful login
+        userEmail.set(email); // Store the email in the Svelte store
+        alert(`Logged in as: ${email}`); // Alert the email to the user
       } else {
         loginMessage = `Error: ${result.message}`;
         alert(`Error: ${result.message}`);
@@ -31,7 +34,7 @@
       loginMessage = `Error: ${error.message}`;
       alert(`Error Occurred: ${error.message}`);
     }
-  }
+}
 
   
   
