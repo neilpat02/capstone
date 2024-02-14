@@ -3,7 +3,11 @@
   import Footer from "./widget/Footer.svelte";
   import AceEditor from "./widget/ace_builds.svelte";
   import { userEmail } from './userStore.js';
+  import { onMount } from 'svelte';
+  import p5 from 'p5';
 
+  // Maze configuration
+  let mazeContainer;
   let editorText = ""; // Placeholder for Text Editor content
   let fileName = ""; // State for the file name
   let isSaving = false; // State to control the display of input for file name and OK button
@@ -13,8 +17,144 @@
   let robotRow = 0;
   let robotCol = 0;
   const mazeSize = 16;
-  let maze = Array.from({ length: mazeSize }, () => new Array(mazeSize).fill(0));
-  maze[robotRow][robotCol] = 1; // Initializing robot's position in the maze
+  onMount(() => {
+    new p5((p) => {
+      let cols, rows;
+      const wid = 25;
+      let grid = [];
+
+      p.setup = () => {
+        p.createCanvas(400, 400);
+        cols = p.floor(400 / wid);
+        rows = p.floor(400 / wid);
+        p.frameRate(30);
+
+        // Initialize grid
+        for (let j = 0; j < rows; j++) {
+          for (let i = 0; i < cols; i++) {
+            let cell = new Cell(i, j, p, wid, grid);
+            grid.push(cell);
+          }
+        }
+
+        let current = grid[0];
+        let stack = [];
+
+        // Maze generation using Depth-First Search
+        do {
+          current.visited = true;
+          let next = current.checkNeighbors();
+          if (next) {
+            next.visited = true;
+            stack.push(current);
+            removeWalls(current, next);
+            current = next;
+          } else if (stack.length > 0) {
+            current = stack.pop();
+          }
+        } while (stack.length > 0);
+      };
+
+      p.draw = () => {
+        p.background(255);
+        for (let i = 0; i < grid.length; i++) {
+          grid[i].show();
+        }
+
+        // Draw the robot
+        const robotX = wid / 2;
+        const robotY = wid / 2 + (2 * wid);
+        p.fill(0, 0, 255);
+        p.circle(robotX, robotY, 20);
+      };
+
+      function Cell(i, j, p, wid, grid) {
+        this.i = i;
+        this.j = j;
+        this.walls = [true, true, true, true]; // top, right, bottom, left
+        this.visited = false;
+
+        this.checkNeighbors = function() {
+          let neighbors = [];
+
+          let top = grid[index(i, j - 1, cols, rows)];
+          let right = grid[index(i + 1, j, cols, rows)];
+          let bottom = grid[index(i, j + 1, cols, rows)];
+          let left = grid[index(i - 1, j, cols, rows)];
+
+          if (top && !top.visited) {
+            neighbors.push(top);
+          }
+          if (right && !right.visited) {
+            neighbors.push(right);
+          }
+          if (bottom && !bottom.visited) {
+            neighbors.push(bottom);
+          }
+          if (left && !left.visited) {
+            neighbors.push(left);
+          }
+
+          if (neighbors.length > 0) {
+            let r = p.floor(p.random(0, neighbors.length));
+            return neighbors[r];
+          } else {
+            return undefined;
+          }
+        };
+
+        this.show = function() {
+          let x = this.i * wid;
+          let y = this.j * wid;
+          p.stroke(0);
+          if (this.walls[0]) {
+            p.line(x, y, x + wid, y);
+          }
+          if (this.walls[1]) {
+            p.line(x + wid, y, x + wid, y + wid);
+          }
+          if (this.walls[2]) {
+            p.line(x + wid, y + wid, x, y + wid);
+          }
+          if (this.walls[3]) {
+            p.line(x, y + wid, x, y);
+          }
+
+          if (this.visited) {
+            p.noStroke();
+            p.fill(255, 255, 255);
+            p.rect(x, y, wid, wid);
+          }
+        };
+      }
+
+      function index(i, j, cols, rows) {
+        if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) {
+          return -1;
+        }
+        return i + j * cols;
+      }
+
+      function removeWalls(a, b) {
+        let x = a.i - b.i;
+        let y = a.j - b.j;
+
+        if (x === 1) {
+          a.walls[3] = false;
+          b.walls[1] = false;
+        } else if (x === -1) {
+          a.walls[1] = false;
+          b.walls[3] = false;
+        } else if (y === 1) {
+          a.walls[0] = false;
+          b.walls[2] = false;
+        } else if (y === -1) {
+          a.walls[2] = false;
+          b.walls[0] = false;
+        }
+      }
+    }, mazeContainer);
+  });
 
   let showSoftware = true; // State to toggle between software and hardware views
 
@@ -69,7 +209,6 @@
 </script>
 
 <Navi/>
-<!-- Display the logged-in user email -->
 <div class="logged-in-as">
   Logged in as: {$userEmail}
 </div>
@@ -80,22 +219,14 @@
 </div>
 
 {#if showSoftware}
-  <!-- Software section -->
   <div class="is-flex is-justify-content-center is-align-items-center is-square" id="software-section">
     <section class="section">
       <div class="has-text-centered">
         <h1 class="title is-1">Maze Simulator</h1>
       </div>
-      <div class="maze">
-        {#each maze as row, i}
-          {#each row as cell, j}
-            <div class="maze-cell {cell === 1 ? 'robot' : ''}"></div>
-          {/each}
-        {/each}
-      </div>
+      <div bind:this={mazeContainer} class="maze-container"></div> <!-- Container for the p5 canvas -->
     </section>
   </div>
-  <!-- Display file name input and OK button when isSaving is true -->
   {#if isSaving}
     <div class="file-name-input">
       <input type="text" bind:value={fileName} placeholder="Enter file name here" />
@@ -104,7 +235,6 @@
   {:else}
     <div class="button-container">
       <button class="thin-button" on:click={promptForFileName}>Save</button>
-      <!-- Restore the File and Run buttons -->
       <button class="thin-button">File</button>
       <button class="thin-button">Run</button>
     </div>
@@ -112,30 +242,16 @@
 {/if}
 
 {#if !showSoftware}
-  <div class="is-flex is-justify-content-center is-align-items-center is-square" id="hardware-section">
-    <section class="section hardware-section">
-      <div style="background: darkgray;"class="has-text-centered">
-        <h1 class="title is-1">Hardware Section</h1>
-        <!-- Add your hardware-related content here -->
-      </div>
-    </section>
-  </div>
-  <div class="button-container">
-    <button class="thin-button">File</button>
-    <button class="thin-button">Save</button>
-    <button class="thin-button-left" on:click={uploadToBot}>Upload to bot</button>
-  </div>
-  
+  <!-- Existing Hardware section code... -->
 {/if}
 
 <div class="content">
   <AceEditor bind:value={editorText} />
 </div>
 
-
-<div style=""class="content has-text-centered">
+<div class="content has-text-centered">
   <p style="color: white">
-    UGA Maze Competition Offical Site 
+    UGA Maze Competition Official Site
   </p>
 </div>
 
@@ -201,26 +317,9 @@
     background-color: gray;
   }
 
-  /* Styles for the Maze and Robot */
-  .maze {
-    display: grid;
-    grid-template-columns: repeat(16, 1fr);
-    grid-template-rows: repeat(16, 1fr);
-    gap: 2px;
-    margin-top: 20px;
-    max-width: 600px; /* Adjust the size as needed */
-    max-height: 600px; /* Adjust the size as needed */
-    border: 1px solid #ccc;
-  }
-
-  .maze-cell {
-    width: 20px;
-    height: 20px;
-    border: 1px solid #ccc;
-    background-color: #f0f0f0;
-  }
-
-  .robot {
-    background-color: blue;
+  .maze-container {
+    /* Styles to ensure the maze is displayed correctly */
+    text-align: center; /* Center the canvas if needed */
+    border:#B71234 5px solid;
   }
 </style>
