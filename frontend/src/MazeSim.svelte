@@ -11,12 +11,15 @@
   let editorText = ""; // Placeholder for Text Editor content
   let fileName = ""; // State for the file name
   let isSaving = false; // State to control the display of input for file name and OK button
+  let serializedMaze = "";
   $: userCurrentEmail = $userEmail; // Reactive declaration for the current user email
 
   // Robot initial position and maze setup
   let robotRow = 0;
   let robotCol = 0;
   const mazeSize = 16;
+  
+
   onMount(() => {
     new p5((p) => {
       let cols, rows;
@@ -29,7 +32,6 @@
         rows = p.floor(400 / wid);
         p.frameRate(30);
 
-        // Initialize grid
         for (let j = 0; j < rows; j++) {
           for (let i = 0; i < cols; i++) {
             let cell = new Cell(i, j, p, wid, grid);
@@ -40,7 +42,6 @@
         let current = grid[0];
         let stack = [];
 
-        // Maze generation using Depth-First Search
         do {
           current.visited = true;
           let next = current.checkNeighbors();
@@ -53,6 +54,9 @@
             current = stack.pop();
           }
         } while (stack.length > 0);
+
+        // Serialize the maze configuration after generation
+        serializedMaze = JSON.stringify(grid.map(cell => cell.serialize()));
       };
 
       p.draw = () => {
@@ -60,40 +64,25 @@
         for (let i = 0; i < grid.length; i++) {
           grid[i].show();
         }
-
-        // Draw the robot
-        const robotX = wid / 2;
-        const robotY = wid / 2 + (2 * wid);
-        p.fill(0, 0, 255);
-        p.circle(robotX, robotY, 20);
       };
 
       function Cell(i, j, p, wid, grid) {
         this.i = i;
         this.j = j;
-        this.walls = [true, true, true, true]; // top, right, bottom, left
+        this.walls = [true, true, true, true];
         this.visited = false;
 
         this.checkNeighbors = function() {
           let neighbors = [];
-
           let top = grid[index(i, j - 1, cols, rows)];
           let right = grid[index(i + 1, j, cols, rows)];
           let bottom = grid[index(i, j + 1, cols, rows)];
           let left = grid[index(i - 1, j, cols, rows)];
 
-          if (top && !top.visited) {
-            neighbors.push(top);
-          }
-          if (right && !right.visited) {
-            neighbors.push(right);
-          }
-          if (bottom && !bottom.visited) {
-            neighbors.push(bottom);
-          }
-          if (left && !left.visited) {
-            neighbors.push(left);
-          }
+          if (top && !top.visited) neighbors.push(top);
+          if (right && !right.visited) neighbors.push(right);
+          if (bottom && !bottom.visited) neighbors.push(bottom);
+          if (left && !left.visited) neighbors.push(left);
 
           if (neighbors.length > 0) {
             let r = p.floor(p.random(0, neighbors.length));
@@ -107,18 +96,10 @@
           let x = this.i * wid;
           let y = this.j * wid;
           p.stroke(0);
-          if (this.walls[0]) {
-            p.line(x, y, x + wid, y);
-          }
-          if (this.walls[1]) {
-            p.line(x + wid, y, x + wid, y + wid);
-          }
-          if (this.walls[2]) {
-            p.line(x + wid, y + wid, x, y + wid);
-          }
-          if (this.walls[3]) {
-            p.line(x, y + wid, x, y);
-          }
+          if (this.walls[0]) p.line(x, y, x + wid, y);
+          if (this.walls[1]) p.line(x + wid, y, x + wid, y + wid);
+          if (this.walls[2]) p.line(x + wid, y + wid, x, y + wid);
+          if (this.walls[3]) p.line(x, y + wid, x, y);
 
           if (this.visited) {
             p.noStroke();
@@ -126,19 +107,25 @@
             p.rect(x, y, wid, wid);
           }
         };
+
+        // Serialization method for a cell
+        this.serialize = function() {
+          return {
+            i: this.i,
+            j: this.j,
+            walls: this.walls
+          };
+        };
       }
 
       function index(i, j, cols, rows) {
-        if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) {
-          return -1;
-        }
+        if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) return -1;
         return i + j * cols;
       }
 
       function removeWalls(a, b) {
         let x = a.i - b.i;
         let y = a.j - b.j;
-
         if (x === 1) {
           a.walls[3] = false;
           b.walls[1] = false;
@@ -156,6 +143,10 @@
     }, mazeContainer);
   });
 
+  function displaySerializedMaze() {
+    console.log(serializedMaze); // For now, simply log the serialized maze to the console
+    alert(serializedMaze); // Alternatively, or in addition, display it in an alert for easy viewing
+  }
   let showSoftware = true; // State to toggle between software and hardware views
 
   // Function to trigger the file name input and OK button for saving
@@ -236,7 +227,8 @@
     <div class="button-container">
       <button class="thin-button" on:click={promptForFileName}>Save</button>
       <button class="thin-button">File</button>
-      <button class="thin-button">Run</button>
+      <button class="thin-button" on:click={displaySerializedMaze}>Run</button>
+
     </div>
   {/if}
 {/if}
