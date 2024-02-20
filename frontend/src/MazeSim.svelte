@@ -71,6 +71,7 @@
         this.j = j;
         this.walls = [true, true, true, true];
         this.visited = false;
+        this.robotVisited = (i === robotRow && j === robotCol);
 
         this.checkNeighbors = function() {
           let neighbors = [];
@@ -113,7 +114,9 @@
           return {
             i: this.i,
             j: this.j,
-            walls: this.walls
+            walls: this.walls,
+            isRobotHere: (this.i === robotRow && this.j === robotCol), // True for starting cell
+            robotVisited: this.robotVisited 
           };
         };
       }
