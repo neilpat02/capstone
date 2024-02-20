@@ -145,6 +145,7 @@
 
   function displaySerializedMaze() {
     console.log(serializedMaze); // For now, simply log the serialized maze to the console
+    console.log(serializedMaze); // For now, just log the serialized maze to)
     alert(serializedMaze); // Alternatively, or in addition, display it in an alert for easy viewing
   }
   let showSoftware = true; // State to toggle between software and hardware views
@@ -211,13 +212,17 @@
 
 {#if showSoftware}
   <div class="is-flex is-justify-content-center is-align-items-center is-square" id="software-section">
+    <div class="has-text-centered">
+      <h1 class="title is-1">Maze Simulator</h1>
+    </div>
     <section class="section">
-      <div class="has-text-centered">
-        <h1 class="title is-1">Maze Simulator</h1>
-      </div>
       <div bind:this={mazeContainer} class="maze-container"></div> <!-- Container for the p5 canvas -->
     </section>
-  </div>
+    <section class="section">
+      <div class="content">
+        <AceEditor bind:value={editorText} />
+      </div>
+    </section>
   {#if isSaving}
     <div class="file-name-input">
       <input type="text" bind:value={fileName} placeholder="Enter file name here" />
@@ -228,18 +233,15 @@
       <button class="thin-button" on:click={promptForFileName}>Save</button>
       <button class="thin-button">File</button>
       <button class="thin-button" on:click={displaySerializedMaze}>Run</button>
-
     </div>
   {/if}
+  </div>
 {/if}
 
 {#if !showSoftware}
   <!-- Existing Hardware section code... -->
 {/if}
 
-<div class="content">
-  <AceEditor bind:value={editorText} />
-</div>
 
 <div class="content has-text-centered">
   <p style="color: white">
