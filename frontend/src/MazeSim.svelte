@@ -3,162 +3,185 @@
   import Footer from "./widget/Footer.svelte";
   import AceEditor from "./widget/ace_builds.svelte";
   import { userEmail } from './userStore.js';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import { tick } from 'svelte';
   import p5 from 'p5';
 
-  // Maze configuration
+  let showSoftware = true;
   let mazeContainer;
-  let editorText = ""; // Placeholder for Text Editor content
-  let fileName = ""; // State for the file name
-  let isSaving = false; // State to control the display of input for file name and OK button
+  let editorText = "";
+  let fileName = "";
+  let isSaving = false;
   let serializedMaze = "";
-  $: userCurrentEmail = $userEmail; // Reactive declaration for the current user email
+  $: userCurrentEmail = $userEmail;
 
-  // Robot initial position and maze setup
   let robotRow = 0;
   let robotCol = 0;
   const mazeSize = 16;
-  
 
-  onMount(() => {
-    new p5((p) => {
-      let cols, rows;
-      const wid = 25;
-      let grid = [];
+  let p5Sketch = null;
 
-      p.setup = () => {
-        p.createCanvas(400, 400);
-        cols = p.floor(400 / wid);
-        rows = p.floor(400 / wid);
-        p.frameRate(30);
+  function initializeMaze() {
+    if (p5Sketch) {
+      p5Sketch.remove(); // Remove the existing p5 instance if it exists
+    }
 
-        for (let j = 0; j < rows; j++) {
-          for (let i = 0; i < cols; i++) {
-            let cell = new Cell(i, j, p, wid, grid);
-            grid.push(cell);
-          }
-        }
+    // Clear the content of the mazeContainer div
+    mazeContainer.innerHTML = '';
 
-        let current = grid[0];
-        let stack = [];
+    // Delay initialization to the next tick using a reactive statement
+    $: if (p5Sketch === null) {
+      setTimeout(() => {
+        p5Sketch = new p5((p) => {
+          let cols, rows;
+          const wid = 25;
+          let grid = [];
 
-        do {
-          current.visited = true;
-          let next = current.checkNeighbors();
-          if (next) {
-            next.visited = true;
-            stack.push(current);
-            removeWalls(current, next);
-            current = next;
-          } else if (stack.length > 0) {
-            current = stack.pop();
-          }
-        } while (stack.length > 0);
+          p.setup = () => {
+            p.createCanvas(400, 400);
+            cols = p.floor(400 / wid);
+            rows = p.floor(400 / wid);
+            p.frameRate(30);
 
-        // Serialize the maze configuration after generation
-        serializedMaze = JSON.stringify(grid.map(cell => cell.serialize()));
-      };
+            for (let j = 0; j < rows; j++) {
+              for (let i = 0; i < cols; i++) {
+                let cell = new Cell(i, j, p, wid, grid);
+                grid.push(cell);
+              }
+            }
 
-      p.draw = () => {
-        p.background(255);
-        for (let i = 0; i < grid.length; i++) {
-          grid[i].show();
-        }
-      };
+            let start = p.floor(p.random(grid.length));
+            let current = grid[start];
+            let stack = [];
 
-      function Cell(i, j, p, wid, grid) {
-        this.i = i;
-        this.j = j;
-        this.walls = [true, true, true, true];
-        this.visited = false;
-        this.robotVisited = (i === robotRow && j === robotCol);
+            do {
+              current.visited = true;
+              let next = current.checkNeighbors();
+              if (next) {
+                next.visited = true;
+                stack.push(current);
+                removeWalls(current, next);
+                current = next;
+              } else if (stack.length > 0) {
+                current = stack.pop();
+              }
+            } while (stack.length > 0);
 
-        this.checkNeighbors = function() {
-          let neighbors = [];
-          let top = grid[index(i, j - 1, cols, rows)];
-          let right = grid[index(i + 1, j, cols, rows)];
-          let bottom = grid[index(i, j + 1, cols, rows)];
-          let left = grid[index(i - 1, j, cols, rows)];
-
-          if (top && !top.visited) neighbors.push(top);
-          if (right && !right.visited) neighbors.push(right);
-          if (bottom && !bottom.visited) neighbors.push(bottom);
-          if (left && !left.visited) neighbors.push(left);
-
-          if (neighbors.length > 0) {
-            let r = p.floor(p.random(0, neighbors.length));
-            return neighbors[r];
-          } else {
-            return undefined;
-          }
-        };
-
-        this.show = function() {
-          let x = this.i * wid;
-          let y = this.j * wid;
-          p.stroke(0);
-          if (this.walls[0]) p.line(x, y, x + wid, y);
-          if (this.walls[1]) p.line(x + wid, y, x + wid, y + wid);
-          if (this.walls[2]) p.line(x + wid, y + wid, x, y + wid);
-          if (this.walls[3]) p.line(x, y + wid, x, y);
-
-          if (this.visited) {
-            p.noStroke();
-            p.fill(255, 255, 255);
-            p.rect(x, y, wid, wid);
-          }
-        };
-
-        // Serialization method for a cell
-        this.serialize = function() {
-          return {
-            i: this.i,
-            j: this.j,
-            walls: this.walls,
-            isRobotHere: (this.i === robotRow && this.j === robotCol), // True for starting cell
-            robotVisited: this.robotVisited 
+            serializedMaze = JSON.stringify(grid.map(cell => cell.serialize()));
           };
-        };
-      }
 
-      function index(i, j, cols, rows) {
-        if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) return -1;
-        return i + j * cols;
-      }
+          p.draw = () => {
+            p.background(255);
+            for (let i = 0; i < grid.length; i++) {
+              grid[i].show();
+            }
+          };
 
-      function removeWalls(a, b) {
-        let x = a.i - b.i;
-        let y = a.j - b.j;
-        if (x === 1) {
-          a.walls[3] = false;
-          b.walls[1] = false;
-        } else if (x === -1) {
-          a.walls[1] = false;
-          b.walls[3] = false;
-        } else if (y === 1) {
-          a.walls[0] = false;
-          b.walls[2] = false;
-        } else if (y === -1) {
-          a.walls[2] = false;
-          b.walls[0] = false;
-        }
-      }
-    }, mazeContainer);
+          function Cell(i, j, p, wid, grid) {
+            this.i = i;
+            this.j = j;
+            this.walls = [true, true, true, true];
+            this.visited = false;
+            this.robotVisited = (i === robotRow && j === robotCol);
+
+            this.checkNeighbors = function () {
+              let neighbors = [];
+              let top = grid[index(i, j - 1, cols, rows)];
+              let right = grid[index(i + 1, j, cols, rows)];
+              let bottom = grid[index(i, j + 1, cols, rows)];
+              let left = grid[index(i - 1, j, cols, rows)];
+
+              if (top && !top.visited) neighbors.push(top);
+              if (right && !right.visited) neighbors.push(right);
+              if (bottom && !bottom.visited) neighbors.push(bottom);
+              if (left && !left.visited) neighbors.push(left);
+
+              if (neighbors.length > 0) {
+                let r = p.floor(p.random(0, neighbors.length));
+                return neighbors[r];
+              } else {
+                return undefined;
+              }
+            };
+
+            this.show = function () {
+              let x = this.i * wid;
+              let y = this.j * wid;
+              p.stroke(0);
+
+              if (this.walls[0]) p.line(x, y, x + wid, y);
+              if (this.walls[1]) p.line(x + wid, y, x + wid, y + wid);
+              if (this.walls[2]) p.line(x + wid, y + wid, x, y + wid);
+              if (this.walls[3]) p.line(x, y + wid, x, y);
+
+              if (this.robotVisited) {
+                p.noStroke();
+                p.fill(0, 0, 255, 100);
+                p.rect(x, y, wid, wid);
+              }
+
+              if (this.i === robotRow && this.j === robotCol) {
+                p.fill(255, 0, 0);
+                p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
+              }
+
+              if (this.visited && !this.robotVisited) {
+                p.noStroke();
+                p.fill(255, 255, 255);
+                p.rect(x, y, wid, wid);
+              }
+            };
+
+            this.serialize = function () {
+              return {
+                i: this.i,
+                j: this.j,
+                walls: this.walls,
+                isRobotHere: (this.i === robotRow && this.j === robotCol),
+                robotVisited: this.robotVisited
+              };
+            };
+          }
+
+          function index(i, j, cols, rows) {
+            if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) return -1;
+            return i + j * cols;
+          }
+
+          function removeWalls(a, b) {
+            let x = a.i - b.i;
+            let y = a.j - b.j;
+            if (x === 1) {
+              a.walls[3] = false;
+              b.walls[1] = false;
+            } else if (x === -1) {
+              a.walls[1] = false;
+              b.walls[3] = false;
+            } else if (y === 1) {
+              a.walls[0] = false;
+              b.walls[2] = false;
+            } else if (y === -1) {
+              a.walls[2] = false;
+              b.walls[0] = false;
+            }
+          }
+        }, mazeContainer);
+      });
+    }
+  }
+
+  onMount(initializeMaze);
+
+  onDestroy(() => {
+    if (p5Sketch) {
+      p5Sketch.remove();
+    }
   });
 
-  function displaySerializedMaze() {
-    console.log(serializedMaze); // For now, simply log the serialized maze to the console
-    console.log(serializedMaze); // For now, just log the serialized maze to)
-    alert(serializedMaze); // Alternatively, or in addition, display it in an alert for easy viewing
-  }
-  let showSoftware = true; // State to toggle between software and hardware views
-
-  // Function to trigger the file name input and OK button for saving
   function promptForFileName() {
-    isSaving = true; // Show input for file name and OK button
+    isSaving = true;
   }
 
-  // Function to handle the actual saving logic
   async function saveText() {
     if (!fileName.trim()) {
       alert('File name is required.');
@@ -180,8 +203,8 @@
 
       if (response.ok) {
         alert('Text saved successfully!');
-        fileName = ""; // Clear file name after successful save
-        isSaving = false; // Hide the input and OK button
+        fileName = "";
+        isSaving = false;
       } else {
         const errorData = await response.json();
         alert(`Failed to save text: ${errorData.message}`);
@@ -192,16 +215,28 @@
     }
   }
 
-  // Toggle the software/hardware view
-  function toggleSection() {
-    showSoftware = !showSoftware;
+  function displaySerializedMaze() {
+    console.log(serializedMaze);
+    console.log(serializedMaze);
+    alert(serializedMaze);
   }
 
-  // Placeholder function for future bot uploading logic
+  function toggleSection() {
+    showSoftware = !showSoftware;
+    if (showSoftware) {
+      initializeMaze(); // Recreate the p5 sketch when switching to the software section
+    } else {
+      p5Sketch.remove();
+    }
+  }
+
   function uploadToBot() {
     console.log('Uploading to the bot...');
   }
 </script>
+
+
+
 
 <Navi/>
 <div class="logged-in-as">
@@ -220,35 +255,32 @@
     </div>
     <div class="is-flex is-justify-content-space-between" style="flex: 1; width: 100%;">
       <div style="flex: 1;">
-        <div bind:this={mazeContainer} class="maze-container"></div> <!-- Container for the p5 canvas -->
+        <div bind:this={mazeContainer} class="maze-container"></div>
       </div>
       <div style="flex: 2;">
         <div class="content">
           <AceEditor bind:value={editorText} />
         </div>
+        {#if isSaving}
+          <div class="file-name-input">
+            <input type="text" bind:value={fileName} placeholder="Enter file name here" />
+            <button on:click={saveText}>OK</button>
+          </div>
+        {:else}
+          <div class="button-container">
+            <button class="thin-button" on:click={promptForFileName}>Save</button>
+            <button class="thin-button">File</button>
+            <button class="thin-button" on:click={displaySerializedMaze}>Run</button>
+          </div>
+        {/if}
       </div>
     </div>
   </div>
-
-
-  {#if isSaving}
-    <div class="file-name-input">
-      <input type="text" bind:value={fileName} placeholder="Enter file name here" />
-      <button on:click={saveText}>OK</button>
-    </div>
-  {:else}
-    <div class="button-container">
-      <button class="thin-button" on:click={promptForFileName}>Save</button>
-      <button class="thin-button">File</button>
-      <button class="thin-button" on:click={displaySerializedMaze}>Run</button>
-    </div>
-  {/if}
 {/if}
 
 {#if !showSoftware}
   <!-- Existing Hardware section code... -->
 {/if}
-
 
 <div class="content has-text-centered">
   <p style="color: white">
@@ -294,7 +326,6 @@
     color: #fff; /* Set text color */
     cursor: pointer;
     margin-left: auto;
-    
   }
 
   /* Styles for the overall layout */
@@ -305,12 +336,10 @@
     margin: 0 2rem;
   }
 
-
   .content {
     margin: 0 2rem 0 2rem;
   }
 
-  
   .thin-button:hover {
     background-color: gray;
   }
@@ -321,7 +350,8 @@
   .maze-container {
     /* Styles to ensure the maze is displayed correctly */
     text-align: center; /* Center the canvas if needed */
-    border:#B71234 5px solid;
+    border: #B71234 5px solid;
     box-sizing: border-box;
+    margin: 0 2rem 0 2rem;
   }
 </style>
