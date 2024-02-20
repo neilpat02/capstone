@@ -211,18 +211,23 @@
 </div>
 
 {#if showSoftware}
-  <div class="is-flex is-justify-content-center is-align-items-center is-square" id="software-section">
+  <div class="is-flex is-flex-direction-column is-justify-content-center is-align-items-center is-square" id="software-section">
     <div class="has-text-centered">
       <h1 class="title is-1">Maze Simulator</h1>
     </div>
-    <section class="section">
-      <div bind:this={mazeContainer} class="maze-container"></div> <!-- Container for the p5 canvas -->
-    </section>
-    <section class="section">
-      <div class="content">
-        <AceEditor bind:value={editorText} />
+    <div class="is-flex is-justify-content-space-between" style="flex: 1; width: 100%;">
+      <div style="flex: 1;">
+        <div bind:this={mazeContainer} class="maze-container"></div> <!-- Container for the p5 canvas -->
       </div>
-    </section>
+      <div style="flex: 2;">
+        <div class="content">
+          <AceEditor bind:value={editorText} />
+        </div>
+      </div>
+    </div>
+  </div>
+
+
   {#if isSaving}
     <div class="file-name-input">
       <input type="text" bind:value={fileName} placeholder="Enter file name here" />
@@ -235,7 +240,6 @@
       <button class="thin-button" on:click={displaySerializedMaze}>Run</button>
     </div>
   {/if}
-  </div>
 {/if}
 
 {#if !showSoftware}
@@ -315,5 +319,6 @@
     /* Styles to ensure the maze is displayed correctly */
     text-align: center; /* Center the canvas if needed */
     border:#B71234 5px solid;
+    box-sizing: border-box;
   }
 </style>
