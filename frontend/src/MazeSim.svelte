@@ -3,8 +3,7 @@
   import Footer from "./widget/Footer.svelte";
   import AceEditor from "./widget/ace_builds.svelte";
   import { userEmail } from './userStore.js';
-  import { onMount, onDestroy } from 'svelte';
-  import { tick } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import p5 from 'p5';
 
   let showSoftware = true;
@@ -12,165 +11,339 @@
   let editorText = "";
   let fileName = "";
   let isSaving = false;
-  let serializedMaze = "";
+  let serializedMaze = []; // Use reactive to watch changes
   $: userCurrentEmail = $userEmail;
 
   let robotRow = 0;
   let robotCol = 0;
-  const mazeSize = 16;
 
   let p5Sketch = null;
 
-  function initializeMaze() {
-    if (p5Sketch) {
-      p5Sketch.remove(); // Remove the existing p5 instance if it exists
-    }
-
-    // Clear the content of the mazeContainer div
-    mazeContainer.innerHTML = '';
-
-    // Delay initialization to the next tick using a reactive statement
-    $: if (p5Sketch === null) {
-      setTimeout(() => {
-        p5Sketch = new p5((p) => {
-          let cols, rows;
-          const wid = 25;
-          let grid = [];
-
-          p.setup = () => {
-            p.createCanvas(400, 400);
-            cols = p.floor(400 / wid);
-            rows = p.floor(400 / wid);
-            p.frameRate(30);
-
-            for (let j = 0; j < rows; j++) {
-              for (let i = 0; i < cols; i++) {
-                let cell = new Cell(i, j, p, wid, grid);
-                grid.push(cell);
-              }
-            }
-
-            let start = p.floor(p.random(grid.length));
-            let current = grid[start];
-            let stack = [];
-
-            do {
-              current.visited = true;
-              let next = current.checkNeighbors();
-              if (next) {
-                next.visited = true;
-                stack.push(current);
-                removeWalls(current, next);
-                current = next;
-              } else if (stack.length > 0) {
-                current = stack.pop();
-              }
-            } while (stack.length > 0);
-
-            serializedMaze = JSON.stringify(grid.map(cell => cell.serialize()));
-          };
-
-          p.draw = () => {
-            p.background(255);
-            for (let i = 0; i < grid.length; i++) {
-              grid[i].show();
-            }
-          };
-
-          function Cell(i, j, p, wid, grid) {
-            this.i = i;
-            this.j = j;
-            this.walls = [true, true, true, true];
-            this.visited = false;
-            this.robotVisited = (i === robotRow && j === robotCol);
-
-            this.checkNeighbors = function () {
-              let neighbors = [];
-              let top = grid[index(i, j - 1, cols, rows)];
-              let right = grid[index(i + 1, j, cols, rows)];
-              let bottom = grid[index(i, j + 1, cols, rows)];
-              let left = grid[index(i - 1, j, cols, rows)];
-
-              if (top && !top.visited) neighbors.push(top);
-              if (right && !right.visited) neighbors.push(right);
-              if (bottom && !bottom.visited) neighbors.push(bottom);
-              if (left && !left.visited) neighbors.push(left);
-
-              if (neighbors.length > 0) {
-                let r = p.floor(p.random(0, neighbors.length));
-                return neighbors[r];
-              } else {
-                return undefined;
-              }
-            };
-
-            this.show = function () {
-              let x = this.i * wid;
-              let y = this.j * wid;
-              p.stroke(0);
-
-              if (this.walls[0]) p.line(x, y, x + wid, y);
-              if (this.walls[1]) p.line(x + wid, y, x + wid, y + wid);
-              if (this.walls[2]) p.line(x + wid, y + wid, x, y + wid);
-              if (this.walls[3]) p.line(x, y + wid, x, y);
-
-              if (this.robotVisited) {
-                p.noStroke();
-                p.fill(0, 0, 255, 100);
-                p.rect(x, y, wid, wid);
-              }
-
-              if (this.i === robotRow && this.j === robotCol) {
-                p.fill(255, 0, 0);
-                p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
-              }
-
-              if (this.visited && !this.robotVisited) {
-                p.noStroke();
-                p.fill(255, 255, 255);
-                p.rect(x, y, wid, wid);
-              }
-            };
-
-            this.serialize = function () {
-              return {
-                i: this.i,
-                j: this.j,
-                walls: this.walls,
-                isRobotHere: (this.i === robotRow && this.j === robotCol),
-                robotVisited: this.robotVisited
-              };
-            };
-          }
-
-          function index(i, j, cols, rows) {
-            if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) return -1;
-            return i + j * cols;
-          }
-
-          function removeWalls(a, b) {
-            let x = a.i - b.i;
-            let y = a.j - b.j;
-            if (x === 1) {
-              a.walls[3] = false;
-              b.walls[1] = false;
-            } else if (x === -1) {
-              a.walls[1] = false;
-              b.walls[3] = false;
-            } else if (y === 1) {
-              a.walls[0] = false;
-              b.walls[2] = false;
-            } else if (y === -1) {
-              a.walls[2] = false;
-              b.walls[0] = false;
-            }
-          }
-        }, mazeContainer);
-      });
-    }
+  // Example function to fetch or simulate initial serializedMaze data
+  async function fetchSerializedMaze() {
+    // Simulated fetch request
+    serializedMaze = [
+      {"i":0,"j":0,"walls":[true,false,true,true],"isRobotHere":true,"robotVisited":true},
+      {"i":1,"j":0,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":0,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":0,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":0,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":0,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":0,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":1,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":1,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":1,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":1,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":1,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":1,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":1,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":1,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":1,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":1,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":1,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":1,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":2,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":2,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":2,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":2,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":2,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":2,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":2,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":3,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":3,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":3,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":3,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":3,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":3,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":3,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":3,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":3,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":3,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":3,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":3,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":4,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":4,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":4,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":4,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":4,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":4,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":4,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":4,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":4,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":4,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":4,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":5,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":5,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":5,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":5,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":5,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":5,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":5,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":5,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":5,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":5,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":5,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":5,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":6,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":6,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":6,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":6,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":6,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":6,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":6,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":6,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":6,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":6,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":6,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":6,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":7,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":7,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":7,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":7,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":7,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":7,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":7,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":7,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":7,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":7,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":7,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":8,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":8,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":8,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":8,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":8,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":8,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":8,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":8,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":8,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":8,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":8,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":8,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":9,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":9,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":9,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":9,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":9,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":9,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":9,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":9,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":9,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":9,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":9,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":10,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":10,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":10,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":10,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":10,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":10,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":10,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":10,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":10,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":10,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":10,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":10,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":10,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":10,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":10,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":10,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":11,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":11,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":11,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":11,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":11,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":11,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":11,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":11,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":11,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":11,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":11,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":11,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":11,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":11,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":11,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":11,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":12,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":12,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":12,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":12,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":12,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":12,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":12,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":12,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":12,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":12,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":12,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":12,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":12,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":12,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":12,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":12,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":13,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":13,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":13,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":13,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":13,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":13,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":13,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":13,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":13,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":13,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":13,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":14,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":14,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":14,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":14,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":14,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":14,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":14,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":14,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":14,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":14,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":14,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":14,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":14,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":14,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":14,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":14,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":0,"j":15,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":1,"j":15,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":2,"j":15,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":3,"j":15,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":4,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":5,"j":15,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+      {"i":6,"j":15,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":7,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":8,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":9,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":10,"j":15,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":11,"j":15,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":12,"j":15,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+      {"i":13,"j":15,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+      {"i":14,"j":15,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+      {"i":15,"j":15,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false}
+    ];
+    drawSerializedMaze(serializedMaze);
   }
 
-  onMount(initializeMaze);
+  function drawSerializedMaze(serializedData) {
+    if (p5Sketch) {
+      p5Sketch.remove();
+    }
+
+    p5Sketch = new p5((p) => {
+      const wid = 25;
+      const cols = 16; // Assuming a 16x16 maze for simplicity
+      const rows = 16;
+      
+      p.setup = () => {
+        p.createCanvas(cols * wid, rows * wid);
+        p.frameRate(30);
+
+        serializedData.forEach(cellData => {
+          let cell = new Cell(cellData.i, cellData.j, p, wid, cellData);
+          // Assuming Cell function is adapted to draw based on cellData
+        });
+      };
+
+      p.draw = () => {
+        p.background(255);
+        // Draw each cell based on the updated serializedMaze data
+        serializedMaze.forEach(cellData => {
+          let cell = new Cell(cellData.i, cellData.j, p, wid, cellData);
+          cell.show();
+        });
+      };
+    }, mazeContainer);
+  }
+
+  // Modified Cell function to accept and draw based on serialized data
+  function Cell(i, j, p, wid, cellData) {
+  const x = i * wid;
+  const y = j * wid;
+  
+  // Draw walls based on the cell's data
+  p.stroke(0); // Set stroke color for walls
+  if (cellData.walls[0]) p.line(x, y, x + wid, y); // Top wall
+  if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid); // Right wall
+  if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid); // Bottom wall
+  if (cellData.walls[3]) p.line(x, y + wid, x, y); // Left wall
+
+  // Fill color based on robotVisited and isRobotHere properties
+  if (cellData.isRobotHere) {
+    p.fill(255, 0, 0); // Red for the robot's current position
+    p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
+  } else if (cellData.robotVisited) {
+    p.fill(0, 0, 255, 100); // Blue with some transparency for visited
+    p.rect(x, y, wid, wid);
+  }
+
+  this.show = function() {
+    // Drawing logic has been moved outside show function
+    // because we draw immediately when creating the Cell instance.
+  };
+}
+
+  onMount(() => {
+    fetchSerializedMaze();
+  });
 
   onDestroy(() => {
     if (p5Sketch) {
@@ -178,6 +351,7 @@
     }
   });
 
+ 
   function promptForFileName() {
     isSaving = true;
   }
@@ -216,18 +390,12 @@
   }
 
   function displaySerializedMaze() {
-    console.log(serializedMaze);
-    console.log(serializedMaze);
-    alert(serializedMaze);
+    console.log({serializedMaze});
+    alert({serializedMaze});
   }
 
   function toggleSection() {
     showSoftware = !showSoftware;
-    if (showSoftware) {
-      initializeMaze(); // Recreate the p5 sketch when switching to the software section
-    } else {
-      p5Sketch.remove();
-    }
   }
 
   function uploadToBot() {
