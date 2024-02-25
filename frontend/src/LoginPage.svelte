@@ -9,9 +9,9 @@
   let password = '';
   let loginMessage = '';
 
-  async function handleSubmit() {
+  async function handleSubmit() { //function to handle the submission of the login info. 
     try {
-      const response = await fetch('http://localhost:3000/api/login', {
+      const response = await fetch('http://localhost:3000/api/login', { //fetches the data from the server
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -21,7 +21,7 @@
 
       const result = await response.json();
 
-      if (response.ok) {
+      if (response.ok) { //if the result is found in the DB, then the login is successful
         loginMessage = "Login successful";
         dispatch('login'); // Dispatch event for successful login
         userEmail.set(email); // Store the email in the Svelte store
@@ -30,7 +30,7 @@
         loginMessage = `Error: ${result.message}`;
         alert(`Error: ${result.message}`);
       }
-    } catch (error) {
+    } catch (error) { //if not, alert user and try again!
       loginMessage = `Error: ${error.message}`;
       alert(`Error Occurred: ${error.message}`);
     }
@@ -39,9 +39,9 @@
   
   
 
-  const handleForgotPassword = async () => {
-  try {
-      const response = await fetch('http://localhost:3000/api/forgot-password', {
+  const handleForgotPassword = async () => { //function to handle forgot password.  
+  try { 
+      const response = await fetch('http://localhost:3000/api/forgot-password', { //awaits a response to check if the user email is found
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +51,7 @@
 
       const result = await response.json();
 
-      if (response.ok) {
+      if (response.ok) { //if the response is found, then the email is going to be sent 
         loginMessage = "Email sent";
         alert("Email sent");
       } else {

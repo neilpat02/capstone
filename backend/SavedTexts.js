@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const SavedTextSchema = new mongoose.Schema({
+const SavedTextSchema = new mongoose.Schema({ //schema is defined to save the text for the python code to the user signed in
   userEmail: { 
     type: String,
     required: true,

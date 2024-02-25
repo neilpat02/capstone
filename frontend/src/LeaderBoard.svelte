@@ -12,7 +12,7 @@
     });
   
     // Function to fetch leaderboard data based on type
-    async function fetchLeaderboard() {
+    async function fetchLeaderboard() { //grab the leaderboard data based on who has signed up from the mongoDB server
         try {
             const response = await fetch(`http://localhost:3000/api/leaderboard?type=${leaderboardType}`);
             if (response.ok) {
@@ -26,7 +26,7 @@
     }
   
     // Function to toggle between software and hardware leaderboard
-    function toggleLeaderboard() {
+    function toggleLeaderboard() { //allows the user to check either the hardware scores or software scores
         leaderboardType = leaderboardType === 'software' ? 'hardware' : 'software';
         fetchLeaderboard();
     }

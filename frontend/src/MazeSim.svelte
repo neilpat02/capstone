@@ -4,283 +4,284 @@
   import AceEditor from "./widget/ace_builds.svelte";
   import { userEmail } from './userStore.js';
   import { onDestroy, onMount } from 'svelte';
-  import p5 from 'p5';
+  import p5 from 'p5'; //p5 library for the graphical representation of the maze 
 
-  let showSoftware = true;
+  let showSoftware = true; //show the software section by default
   let mazeContainer;
-  let editorText = "";
-  let fileName = "";
+  let editorText = ""; //track the code that is written
+  let fileName = ""; // name of the file 
   let isSaving = false;
+  let savedFiles = [];
   var serializedMaze = []; // Use reactive to watch changes
-  $: userCurrentEmail = $userEmail;
+  $: userCurrentEmail = $userEmail; 
 
   let robotRow = 0;
   let robotCol = 0;
 
   let p5Sketch = null;
 
-  // Example function to fetch or simulate initial serializedMaze data
-  async function fetchSerializedMaze() {
+  // simulating a fetch to get a serialized maze
+  async function fetchSerializedMaze() { 
     // Simulated fetch request
-    serializedMaze = [
-      {"i":0,"j":0,"walls":[true,false,true,true],"isRobotHere":true,"robotVisited":true},
-      {"i":1,"j":0,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":0,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":0,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":0,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":0,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":0,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":1,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":1,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":1,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":1,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":1,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":1,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":1,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":1,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":1,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":1,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":1,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":1,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":2,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":2,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":2,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":2,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":2,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":2,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":2,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":3,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":3,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":3,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":3,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":3,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":3,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":3,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":3,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":3,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":3,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":3,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":3,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":4,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":4,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":4,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":4,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":4,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":4,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":4,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":4,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":4,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":4,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":4,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":5,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":5,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":5,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":5,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":5,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":5,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":5,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":5,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":5,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":5,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":5,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":5,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":6,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":6,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":6,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":6,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":6,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":6,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":6,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":6,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":6,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":6,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":6,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":6,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":7,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":7,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":7,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":7,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":7,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":7,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":7,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":7,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":7,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":7,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":7,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":8,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":8,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":8,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":8,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":8,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":8,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":8,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":8,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":8,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":8,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":8,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":8,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":9,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":9,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":9,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":9,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":9,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":9,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":9,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":9,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":9,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":9,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":9,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":10,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":10,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":10,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":10,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":10,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":10,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":10,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":10,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":10,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":10,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":10,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":10,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":10,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":10,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":10,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":10,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":11,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":11,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":11,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":11,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":11,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":11,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":11,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":11,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":11,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":11,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":11,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":11,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":11,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":11,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":11,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":11,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":12,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":12,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":12,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":12,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":12,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":12,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":12,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":12,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":12,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":12,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":12,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":12,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":12,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":12,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":12,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":12,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":13,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":13,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":13,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":13,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":13,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":13,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":13,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":13,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":13,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":13,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":13,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":14,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":14,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":14,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":14,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":14,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":14,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":14,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":14,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":14,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":14,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":14,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":14,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":14,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":14,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":14,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":14,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":0,"j":15,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":1,"j":15,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":2,"j":15,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":3,"j":15,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":4,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":5,"j":15,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
-      {"i":6,"j":15,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":7,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":8,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":9,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":10,"j":15,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":11,"j":15,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":12,"j":15,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
-      {"i":13,"j":15,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
-      {"i":14,"j":15,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
-      {"i":15,"j":15,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false}
-    ];
-    drawSerializedMaze(serializedMaze);
+    //serializedMaze = [
+    //  {"i":0,"j":0,"walls":[true,false,true,true],"isRobotHere":true,"robotVisited":true},
+    //  {"i":1,"j":0,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":0,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":0,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":0,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":0,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":0,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":0,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":0,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":1,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":1,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":1,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":1,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":1,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":1,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":1,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":1,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":1,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":1,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":1,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":1,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":1,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":2,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":2,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":2,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":2,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":2,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":2,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":2,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":2,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":2,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":3,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":3,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":3,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":3,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":3,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":3,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":3,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":3,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":3,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":3,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":3,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":3,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":3,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":4,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":4,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":4,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":4,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":4,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":4,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":4,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":4,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":4,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":4,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":4,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":4,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":5,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":5,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":5,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":5,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":5,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":5,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":5,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":5,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":5,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":5,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":5,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":5,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":5,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":6,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":6,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":6,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":6,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":6,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":6,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":6,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":6,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":6,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":6,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":6,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":6,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":6,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":7,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":7,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":7,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":7,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":7,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":7,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":7,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":7,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":7,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":7,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":7,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":7,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":8,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":8,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":8,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":8,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":8,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":8,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":8,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":8,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":8,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":8,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":8,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":8,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":8,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":9,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":9,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":9,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":9,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":9,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":9,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":9,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":9,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":9,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":9,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":9,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":9,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":10,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":10,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":10,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":10,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":10,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":10,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":10,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":10,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":10,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":10,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":10,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":10,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":10,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":10,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":10,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":10,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":11,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":11,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":11,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":11,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":11,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":11,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":11,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":11,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":11,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":11,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":11,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":11,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":11,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":11,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":11,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":11,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":12,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":12,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":12,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":12,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":12,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":12,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":12,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":12,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":12,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":12,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":12,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":12,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":12,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":12,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":12,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":12,"walls":[true,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":13,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":13,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":13,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":13,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":13,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":13,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":13,"walls":[true,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":13,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":13,"walls":[false,true,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":13,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":13,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":13,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":14,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":14,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":14,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":14,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":14,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":14,"walls":[true,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":14,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":14,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":14,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":14,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":14,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":14,"walls":[false,false,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":14,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":14,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":14,"walls":[false,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":14,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":0,"j":15,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":1,"j":15,"walls":[true,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":2,"j":15,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":3,"j":15,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":4,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":5,"j":15,"walls":[true,false,true,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":6,"j":15,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":7,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":8,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":9,"j":15,"walls":[false,true,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":10,"j":15,"walls":[true,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":11,"j":15,"walls":[true,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":12,"j":15,"walls":[false,false,false,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":13,"j":15,"walls":[false,true,true,false],"isRobotHere":false,"robotVisited":false},
+    //  {"i":14,"j":15,"walls":[false,false,false,true],"isRobotHere":false,"robotVisited":false},
+    //  {"i":15,"j":15,"walls":[false,true,false,true],"isRobotHere":false,"robotVisited":false}
+    //];
+    drawSerializedMaze(serializedMaze); //sends that serialized maze to a function that generates the p5.js maze sketch
   }
 
   function drawSerializedMaze(serializedData) {
@@ -288,27 +289,27 @@
       p5Sketch.remove();
     }
 
-    p5Sketch = new p5((p) => {
+    p5Sketch = new p5((p) => { 
       const wid = 25;
       const cols = 16; // Assuming a 16x16 maze for simplicity
       const rows = 16;
       
       p.setup = () => {
-        p.createCanvas(cols * wid, rows * wid);
+        p.createCanvas(cols * wid, rows * wid); //creating the canvas that matches the size and cells
         p.frameRate(30);
 
         serializedData.forEach(cellData => {
-          let cell = new Cell(cellData.i, cellData.j, p, wid, cellData);
+          let cell = new Cell(cellData.i, cellData.j, p, wid, cellData); //for each cell data in the array , create a cell of the width 
           // Assuming Cell function is adapted to draw based on cellData
         });
       };
 
       p.draw = () => {
-        p.background(255);
+        p.background(255); 
         // Draw each cell based on the updated serializedMaze data
         serializedMaze.forEach(cellData => {
           let cell = new Cell(cellData.i, cellData.j, p, wid, cellData);
-          cell.show();
+          cell.show(); 
         });
       };
     }, mazeContainer);
@@ -363,7 +364,7 @@
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/save-text', {
+      const response = await fetch('http://localhost:3000/api/save-text', { // await the a response (button press) from the user 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -375,7 +376,7 @@
         }),
       });
 
-      if (response.ok) {
+      if (response.ok) { //text is saved successfully
         alert('Text saved successfully!');
         fileName = "";
         isSaving = false;
@@ -401,6 +402,33 @@
   function uploadToBot() {
     console.log('Uploading to the bot...');
   }
+
+
+  async function fetchSavedFiles() {
+    const response = await fetch(`http://localhost:3000/api/get-texts?userEmail=${$userEmail}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (response.ok) {
+        savedFiles = await response.json();
+        console.log(savedFiles); // Correctly logging the fetched files
+    } else {
+        alert('Failed to fetch files.');
+    }
+  }
+
+  function loadFileContent(event) {
+    const selectedFile = savedFiles.find(file => file.fileName === event.target.value);
+    if (selectedFile) {
+        editorText = selectedFile.content; // Load the selected file's content into the editor
+    }
+  }
+
+
+
 </script>
 
 
@@ -427,6 +455,14 @@
       </div>
       <div style="flex: 2;">
         <div class="content">
+          {#if savedFiles.length > 0}
+            <select on:change="{loadFileContent}" class="file-dropdown">
+              <option value="">Select a file...</option>
+              {#each savedFiles as file}
+                <option value="{file.fileName}">{file.fileName}</option>
+              {/each}
+            </select>
+          {/if}
           <AceEditor bind:value={editorText} />
         </div>
         {#if isSaving}
@@ -437,7 +473,7 @@
         {:else}
           <div class="button-container">
             <button class="thin-button" on:click={promptForFileName}>Save</button>
-            <button class="thin-button">File</button>
+            <button class="thin-button" on:click={fetchSavedFiles}>File</button>
             <button class="thin-button" on:click={displaySerializedMaze}>Run</button>
           </div>
         {/if}
@@ -522,4 +558,12 @@
     box-sizing: border-box;
     margin: 0 2rem 0 2rem;
   }
+
+  .file-dropdown {
+  margin: 10px 0;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
 </style>
