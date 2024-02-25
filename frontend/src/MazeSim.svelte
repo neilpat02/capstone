@@ -11,7 +11,7 @@
   let editorText = "";
   let fileName = "";
   let isSaving = false;
-  let serializedMaze = []; // Use reactive to watch changes
+  var serializedMaze = []; // Use reactive to watch changes
   $: userCurrentEmail = $userEmail;
 
   let robotRow = 0;
@@ -390,8 +390,8 @@
   }
 
   function displaySerializedMaze() {
-    console.log({serializedMaze});
-    alert({serializedMaze});
+    console.log(JSON.stringify(serializedMaze, null, 2));
+    alert(JSON.stringify(serializedMaze));
   }
 
   function toggleSection() {
