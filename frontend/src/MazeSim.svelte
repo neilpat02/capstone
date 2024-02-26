@@ -20,73 +20,152 @@
 
   let p5Sketch = null;
 
-  // simulating a fetch to get a serialized maze
-  async function fetchSerializedMaze() { 
-    // Simulated fetch request
-    serializedMaze = [{"i":0,"j":0,"walls":[true,true,false,true]},{"i":1,"j":0,"walls":[true,false,false,true]},{"i":2,"j":0,"walls":[true,true,false,false]},{"i":3,"j":0,"walls":[true,false,false,true]},{"i":4,"j":0,"walls":[true,false,true,false]},{"i":5,"j":0,"walls":[true,false,false,false]},{"i":6,"j":0,"walls":[true,false,true,false]},{"i":7,"j":0,"walls":[true,false,true,false]},{"i":8,"j":0,"walls":[true,true,true,false]},{"i":9,"j":0,"walls":[true,false,false,true]},{"i":10,"j":0,"walls":[true,false,false,false]},{"i":11,"j":0,"walls":[true,true,true,false]},{"i":12,"j":0,"walls":[true,false,false,true]},{"i":13,"j":0,"walls":[true,true,false,false]},{"i":14,"j":0,"walls":[true,false,false,true]},{"i":15,"j":0,"walls":[true,true,false,false]},{"i":0,"j":1,"walls":[false,false,true,true]},{"i":1,"j":1,"walls":[false,true,true,false]},{"i":2,"j":1,"walls":[false,true,false,true]},{"i":3,"j":1,"walls":[false,false,true,true]},{"i":4,"j":1,"walls":[true,true,true,false]},{"i":5,"j":1,"walls":[false,false,false,true]},{"i":6,"j":1,"walls":[true,false,true,false]},{"i":7,"j":1,"walls":[true,false,true,false]},{"i":8,"j":1,"walls":[true,false,true,false]},{"i":9,"j":1,"walls":[false,true,true,false]},{"i":10,"j":1,"walls":[false,true,false,true]},{"i":11,"j":1,"walls":[true,false,false,true]},{"i":12,"j":1,"walls":[false,true,true,false]},{"i":13,"j":1,"walls":[false,false,true,true]},{"i":14,"j":1,"walls":[false,true,true,false]},{"i":15,"j":1,"walls":[false,true,false,true]},{"i":0,"j":2,"walls":[true,false,false,true]},{"i":1,"j":2,"walls":[true,true,true,false]},{"i":2,"j":2,"walls":[false,false,true,true]},{"i":3,"j":2,"walls":[true,false,true,false]},{"i":4,"j":2,"walls":[true,true,false,false]},{"i":5,"j":2,"walls":[false,true,false,true]},{"i":6,"j":2,"walls":[true,false,true,true]},{"i":7,"j":2,"walls":[true,false,false,false]},{"i":8,"j":2,"walls":[true,true,false,false]},{"i":9,"j":2,"walls":[true,true,false,true]},{"i":10,"j":2,"walls":[false,false,true,true]},{"i":11,"j":2,"walls":[false,false,true,false]},{"i":12,"j":2,"walls":[true,false,true,false]},{"i":13,"j":2,"walls":[true,false,true,false]},{"i":14,"j":2,"walls":[true,true,true,false]},{"i":15,"j":2,"walls":[false,true,false,true]},{"i":0,"j":3,"walls":[false,false,false,true]},{"i":1,"j":3,"walls":[true,false,false,false]},{"i":2,"j":3,"walls":[true,true,true,false]},{"i":3,"j":3,"walls":[true,false,false,true]},{"i":4,"j":3,"walls":[false,true,true,false]},{"i":5,"j":3,"walls":[false,false,true,true]},{"i":6,"j":3,"walls":[true,true,false,false]},{"i":7,"j":3,"walls":[false,true,false,true]},{"i":8,"j":3,"walls":[false,false,true,true]},{"i":9,"j":3,"walls":[false,true,true,false]},{"i":10,"j":3,"walls":[true,false,false,true]},{"i":11,"j":3,"walls":[true,false,true,false]},{"i":12,"j":3,"walls":[true,false,true,false]},{"i":13,"j":3,"walls":[true,false,true,false]},{"i":14,"j":3,"walls":[true,true,false,false]},{"i":15,"j":3,"walls":[false,true,false,true]},{"i":0,"j":4,"walls":[false,true,true,true]},{"i":1,"j":4,"walls":[false,false,true,true]},{"i":2,"j":4,"walls":[true,true,false,false]},{"i":3,"j":4,"walls":[false,false,true,true]},{"i":4,"j":4,"walls":[true,true,false,false]},{"i":5,"j":4,"walls":[true,false,true,true]},{"i":6,"j":4,"walls":[false,false,true,false]},{"i":7,"j":4,"walls":[false,true,true,false]},{"i":8,"j":4,"walls":[true,false,false,true]},{"i":9,"j":4,"walls":[true,true,false,false]},{"i":10,"j":4,"walls":[false,false,true,true]},{"i":11,"j":4,"walls":[true,true,false,false]},{"i":12,"j":4,"walls":[true,false,false,true]},{"i":13,"j":4,"walls":[true,false,true,false]},{"i":14,"j":4,"walls":[false,true,true,false]},{"i":15,"j":4,"walls":[false,true,false,true]},{"i":0,"j":5,"walls":[true,false,false,true]},{"i":1,"j":5,"walls":[true,false,true,false]},{"i":2,"j":5,"walls":[false,false,true,false]},{"i":3,"j":5,"walls":[true,true,false,false]},{"i":4,"j":5,"walls":[false,true,false,true]},{"i":5,"j":5,"walls":[true,false,false,true]},{"i":6,"j":5,"walls":[true,false,true,false]},{"i":7,"j":5,"walls":[true,false,true,false]},{"i":8,"j":5,"walls":[false,true,true,false]},{"i":9,"j":5,"walls":[false,false,true,true]},{"i":10,"j":5,"walls":[true,false,true,false]},{"i":11,"j":5,"walls":[false,true,true,false]},{"i":12,"j":5,"walls":[false,true,false,true]},{"i":13,"j":5,"walls":[true,false,false,true]},{"i":14,"j":5,"walls":[true,false,true,false]},{"i":15,"j":5,"walls":[false,true,false,false]},{"i":0,"j":6,"walls":[false,true,false,true]},{"i":1,"j":6,"walls":[true,false,false,true]},{"i":2,"j":6,"walls":[true,false,true,false]},{"i":3,"j":6,"walls":[false,true,true,false]},{"i":4,"j":6,"walls":[false,false,true,true]},{"i":5,"j":6,"walls":[false,true,true,false]},{"i":6,"j":6,"walls":[true,false,true,true]},{"i":7,"j":6,"walls":[true,false,false,false]},{"i":8,"j":6,"walls":[true,true,false,false]},{"i":9,"j":6,"walls":[true,false,false,true]},{"i":10,"j":6,"walls":[true,true,true,false]},{"i":11,"j":6,"walls":[true,false,false,true]},{"i":12,"j":6,"walls":[false,true,true,false]},{"i":13,"j":6,"walls":[false,false,true,true]},{"i":14,"j":6,"walls":[true,true,false,false]},{"i":15,"j":6,"walls":[false,true,false,true]},{"i":0,"j":7,"walls":[false,true,false,true]},{"i":1,"j":7,"walls":[false,true,false,true]},{"i":2,"j":7,"walls":[true,false,false,true]},{"i":3,"j":7,"walls":[true,false,true,false]},{"i":4,"j":7,"walls":[true,false,true,false]},{"i":5,"j":7,"walls":[true,false,true,false]},{"i":6,"j":7,"walls":[true,false,false,false]},{"i":7,"j":7,"walls":[false,true,true,false]},{"i":8,"j":7,"walls":[false,false,true,true]},{"i":9,"j":7,"walls":[false,true,true,false]},{"i":10,"j":7,"walls":[true,false,false,true]},{"i":11,"j":7,"walls":[false,true,true,false]},{"i":12,"j":7,"walls":[true,false,false,true]},{"i":13,"j":7,"walls":[true,false,true,false]},{"i":14,"j":7,"walls":[false,true,true,false]},{"i":15,"j":7,"walls":[false,true,false,true]},{"i":0,"j":8,"walls":[false,true,false,true]},{"i":1,"j":8,"walls":[false,true,false,true]},{"i":2,"j":8,"walls":[false,true,false,true]},{"i":3,"j":8,"walls":[true,false,false,true]},{"i":4,"j":8,"walls":[true,false,true,false]},{"i":5,"j":8,"walls":[true,true,true,false]},{"i":6,"j":8,"walls":[false,true,false,true]},{"i":7,"j":8,"walls":[true,false,false,true]},{"i":8,"j":8,"walls":[true,false,true,false]},{"i":9,"j":8,"walls":[true,true,false,false]},{"i":10,"j":8,"walls":[false,false,true,true]},{"i":11,"j":8,"walls":[true,true,false,false]},{"i":12,"j":8,"walls":[false,false,true,true]},{"i":13,"j":8,"walls":[true,true,false,false]},{"i":14,"j":8,"walls":[true,true,false,true]},{"i":15,"j":8,"walls":[false,true,false,true]},{"i":0,"j":9,"walls":[false,true,false,true]},{"i":1,"j":9,"walls":[false,false,true,true]},{"i":2,"j":9,"walls":[false,true,true,false]},{"i":3,"j":9,"walls":[false,false,false,true]},{"i":4,"j":9,"walls":[true,false,true,false]},{"i":5,"j":9,"walls":[true,false,true,false]},{"i":6,"j":9,"walls":[false,true,true,false]},{"i":7,"j":9,"walls":[false,false,true,true]},{"i":8,"j":9,"walls":[true,true,false,false]},{"i":9,"j":9,"walls":[false,false,false,true]},{"i":10,"j":9,"walls":[true,true,false,false]},{"i":11,"j":9,"walls":[false,false,true,true]},{"i":12,"j":9,"walls":[true,false,true,false]},{"i":13,"j":9,"walls":[false,true,true,false]},{"i":14,"j":9,"walls":[false,true,false,true]},{"i":15,"j":9,"walls":[false,true,false,true]},{"i":0,"j":10,"walls":[false,true,false,true]},{"i":1,"j":10,"walls":[true,false,false,true]},{"i":2,"j":10,"walls":[true,false,true,false]},{"i":3,"j":10,"walls":[false,true,true,false]},{"i":4,"j":10,"walls":[true,false,false,true]},{"i":5,"j":10,"walls":[true,false,true,false]},{"i":6,"j":10,"walls":[true,false,true,false]},{"i":7,"j":10,"walls":[true,false,true,false]},{"i":8,"j":10,"walls":[false,true,true,false]},{"i":9,"j":10,"walls":[false,true,false,true]},{"i":10,"j":10,"walls":[false,false,true,true]},{"i":11,"j":10,"walls":[true,false,true,false]},{"i":12,"j":10,"walls":[true,false,true,false]},{"i":13,"j":10,"walls":[true,true,true,false]},{"i":14,"j":10,"walls":[false,false,false,true]},{"i":15,"j":10,"walls":[false,true,true,false]},{"i":0,"j":11,"walls":[false,true,false,true]},{"i":1,"j":11,"walls":[false,true,false,true]},{"i":2,"j":11,"walls":[true,false,true,true]},{"i":3,"j":11,"walls":[true,true,false,false]},{"i":4,"j":11,"walls":[false,false,true,true]},{"i":5,"j":11,"walls":[true,true,false,false]},{"i":6,"j":11,"walls":[true,false,false,true]},{"i":7,"j":11,"walls":[true,true,false,false]},{"i":8,"j":11,"walls":[true,true,false,true]},{"i":9,"j":11,"walls":[false,false,true,true]},{"i":10,"j":11,"walls":[true,true,false,false]},{"i":11,"j":11,"walls":[true,false,false,true]},{"i":12,"j":11,"walls":[true,false,true,false]},{"i":13,"j":11,"walls":[true,true,false,false]},{"i":14,"j":11,"walls":[false,true,false,true]},{"i":15,"j":11,"walls":[true,true,false,true]},{"i":0,"j":12,"walls":[false,true,false,true]},{"i":1,"j":12,"walls":[false,false,false,true]},{"i":2,"j":12,"walls":[true,false,true,false]},{"i":3,"j":12,"walls":[false,false,true,false]},{"i":4,"j":12,"walls":[true,true,true,false]},{"i":5,"j":12,"walls":[false,false,true,true]},{"i":6,"j":12,"walls":[false,true,true,false]},{"i":7,"j":12,"walls":[false,false,true,true]},{"i":8,"j":12,"walls":[false,true,false,false]},{"i":9,"j":12,"walls":[true,true,false,true]},{"i":10,"j":12,"walls":[false,false,true,true]},{"i":11,"j":12,"walls":[false,true,true,false]},{"i":12,"j":12,"walls":[true,false,false,true]},{"i":13,"j":12,"walls":[false,true,false,false]},{"i":14,"j":12,"walls":[false,false,true,true]},{"i":15,"j":12,"walls":[false,true,false,false]},{"i":0,"j":13,"walls":[false,true,false,true]},{"i":1,"j":13,"walls":[false,true,true,true]},{"i":2,"j":13,"walls":[true,false,false,true]},{"i":3,"j":13,"walls":[true,false,true,false]},{"i":4,"j":13,"walls":[true,false,true,false]},{"i":5,"j":13,"walls":[true,false,true,false]},{"i":6,"j":13,"walls":[true,false,true,false]},{"i":7,"j":13,"walls":[true,true,false,false]},{"i":8,"j":13,"walls":[false,true,false,true]},{"i":9,"j":13,"walls":[false,false,true,true]},{"i":10,"j":13,"walls":[true,true,false,false]},{"i":11,"j":13,"walls":[true,false,false,true]},{"i":12,"j":13,"walls":[false,true,true,false]},{"i":13,"j":13,"walls":[false,false,false,true]},{"i":14,"j":13,"walls":[true,true,true,false]},{"i":15,"j":13,"walls":[false,true,false,true]},{"i":0,"j":14,"walls":[false,false,false,true]},{"i":1,"j":14,"walls":[true,false,true,false]},{"i":2,"j":14,"walls":[false,true,true,false]},{"i":3,"j":14,"walls":[true,true,false,true]},{"i":4,"j":14,"walls":[true,false,false,true]},{"i":5,"j":14,"walls":[true,false,true,false]},{"i":6,"j":14,"walls":[true,false,true,false]},{"i":7,"j":14,"walls":[false,true,true,false]},{"i":8,"j":14,"walls":[false,true,false,true]},{"i":9,"j":14,"walls":[true,false,false,true]},{"i":10,"j":14,"walls":[false,true,false,false]},{"i":11,"j":14,"walls":[false,true,false,true]},{"i":12,"j":14,"walls":[true,false,true,true]},{"i":13,"j":14,"walls":[false,true,true,false]},{"i":14,"j":14,"walls":[true,false,false,true]},{"i":15,"j":14,"walls":[false,true,true,false]},{"i":0,"j":15,"walls":[false,false,true,true]},{"i":1,"j":15,"walls":[true,false,true,false]},{"i":2,"j":15,"walls":[true,false,true,false]},{"i":3,"j":15,"walls":[false,true,true,false]},{"i":4,"j":15,"walls":[false,false,true,true]},{"i":5,"j":15,"walls":[true,false,true,false]},{"i":6,"j":15,"walls":[true,false,true,false]},{"i":7,"j":15,"walls":[true,false,true,false]},{"i":8,"j":15,"walls":[false,false,true,false]},{"i":9,"j":15,"walls":[false,true,true,false]},{"i":10,"j":15,"walls":[false,true,true,true]},{"i":11,"j":15,"walls":[false,false,true,true]},{"i":12,"j":15,"walls":[true,false,true,false]},{"i":13,"j":15,"walls":[true,false,true,false]},{"i":14,"j":15,"walls":[false,false,true,false]},{"i":15,"j":15,"walls":[true,true,true,false]}];
-    drawSerializedMaze(serializedMaze); //sends that serialized maze to a function that generates the p5.js maze sketch
-  }
+  function generateMaze(cols, rows) {
+    let grid = [];
+    let stack = [];
 
-  function drawSerializedMaze(serializedData) {
-    if (p5Sketch) {
-      p5Sketch.remove();
+    // Initialize all cells
+    for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+            let cell = new Cell(i, j, cols, rows, grid);
+            // Check if the cell is the initial robot position
+            cell.isRobotHere = i === robotRow && j === robotCol;
+            cell.robotVisited = cell.isRobotHere; // Assume robot starts here and marks it as visited
+            grid.push(cell);
+        }
     }
 
-    p5Sketch = new p5((p) => { 
-      const wid = 25;
-      const cols = 16; // Assuming a 16x16 maze for simplicity
-      const rows = 16;
-      
-      p.setup = () => {
-        p.createCanvas(cols * wid, rows * wid); //creating the canvas that matches the size and cells
-        p.frameRate(30);
+    let current = grid[0]; // Start the maze generation from the first cell
+    current.visited = true;
 
-        serializedData.forEach(cellData => {
-          let cell = new Cell(cellData.i, cellData.j, p, wid, cellData); //for each cell data in the array , create a cell of the width 
-          // Assuming Cell function is adapted to draw based on cellData
-        });
-      };
+    do {
+        let next = current.checkNeighbors();
+        if (next) {
+            next.visited = true;
+            // Push the current cell to the stack
+            stack.push(current);
+            // Remove the walls between the current cell and the next cell
+            removeWalls(current, next);
+            // Move to the next cell
+            current = next;
+        } else if (stack.length > 0) {
+            current = stack.pop();
+        }
+    } while (stack.length > 0);
 
-      p.draw = () => {
-        p.background(255); 
-        // Draw each cell based on the updated serializedMaze data
-        serializedMaze.forEach(cellData => {
-          let cell = new Cell(cellData.i, cellData.j, p, wid, cellData);
-          cell.show(); 
-        });
-      };
-    }, mazeContainer);
-  }
-
-  // Modified Cell function to accept and draw based on serialized data
-  function Cell(i, j, p, wid, cellData) {
-  const x = i * wid;
-  const y = j * wid;
-  
-  // Draw walls based on the cell's data
-  p.stroke(0); // Set stroke color for walls
-  if (cellData.walls[0]) p.line(x, y, x + wid, y); // Top wall
-  if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid); // Right wall
-  if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid); // Bottom wall
-  if (cellData.walls[3]) p.line(x, y + wid, x, y); // Left wall
-
-  // Fill color based on robotVisited and isRobotHere properties
-  if (cellData.isRobotHere) {
-    p.fill(255, 0, 0); // Red for the robot's current position
-    p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
-  } else if (cellData.robotVisited) {
-    p.fill(0, 0, 255, 100); // Blue with some transparency for visited
-    p.rect(x, y, wid, wid);
-  }
-
-  this.show = function() {
-    // Drawing logic has been moved outside show function
-    // because we draw immediately when creating the Cell instance.
-  };
+    // Serialize the maze with updated properties
+    return grid.map(cell => ({
+        i: cell.i,
+        j: cell.j,
+        walls: cell.walls,
+        isRobotHere: cell.isRobotHere,
+        robotVisited: cell.robotVisited
+    }));
 }
 
+class Cell {
+    constructor(i, j, cols, rows, grid) {
+        this.i = i;
+        this.j = j;
+        this.walls = [true, true, true, true]; // Top, right, bottom, left walls
+        this.visited = false; // Flag to mark if the cell has been visited during maze generation
+        this.cols = cols; // Total columns in the maze
+        this.rows = rows; // Total rows in the maze
+        this.grid = grid; // Reference to the entire grid for checking neighbors
+        // Initialize isRobotHere and robotVisited properties
+        this.isRobotHere = false;
+        this.robotVisited = false;
+    }
+
+    checkNeighbors() {
+        let neighbors = [];
+
+        let top = this.index(this.i, this.j - 1);
+        let right = this.index(this.i + 1, this.j);
+        let bottom = this.index(this.i, this.j + 1);
+        let left = this.index(this.i - 1, this.j);
+
+        if (top !== -1 && !this.grid[top].visited) neighbors.push(this.grid[top]);
+        if (right !== -1 && !this.grid[right].visited) neighbors.push(this.grid[right]);
+        if (bottom !== -1 && !this.grid[bottom].visited) neighbors.push(this.grid[bottom]);
+        if (left !== -1 && !this.grid[left].visited) neighbors.push(this.grid[left]);
+
+        if (neighbors.length > 0) {
+            let r = Math.floor(Math.random() * neighbors.length);
+            return neighbors[r];
+        } else {
+            return undefined;
+        }
+    }
+
+    index(i, j) {
+        if (i < 0 || j < 0 || i >= this.cols || j >= this.rows) {
+            return -1;
+        }
+        return i + j * this.cols;
+    }
+}
+
+function removeWalls(a, b) {
+    let x = a.i - b.i;
+    if (x === 1) {
+        a.walls[3] = false;
+        b.walls[1] = false;
+    } else if (x === -1) {
+        a.walls[1] = false;
+        b.walls[3] = false;
+    }
+
+    let y = a.j - b.j;
+    if (y === 1) {
+        a.walls[0] = false;
+        b.walls[2] = false;
+    } else if (y === -1) {
+        a.walls[2] = false;
+        b.walls[0] = false;
+    }
+}
+  
+
+function drawSerializedMaze() {
+    new p5((p) => {
+        const wid = 25; // Width and height of each cell
+        const cols = 16; // Number of columns
+        const rows = 16; // Number of rows
+
+        p.setup = () => {
+            p.createCanvas(cols * wid, rows * wid);
+            p.background(255);
+
+            // Iterate over each cell in the serialized maze data
+            for (let cellData of serializedMaze) {
+                const x = cellData.i * wid;
+                const y = cellData.j * wid;
+                p.stroke(0); // Set stroke color for drawing walls
+
+                // Draw walls based on the cell data
+                if (cellData.walls[0]) p.line(x, y, x + wid, y); // Top wall
+                if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid); // Right wall
+                if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid); // Bottom wall
+                if (cellData.walls[3]) p.line(x, y + wid, x, y); // Left wall
+
+                // Check if the cell is the robot's current position
+                if (cellData.isRobotHere) {
+                    p.fill(255, 0, 0); // Set fill color to red
+                    p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2); // Draw a circle in the middle of the cell
+                }
+            }
+        };
+    }, mazeContainer);
+}
+
+
+  // Modified Cell function to accept and draw based on serialized data
+
   onMount(() => {
-    fetchSerializedMaze();
+    serializedMaze = generateMaze(16, 16); // Generate maze with 16x16 grid
+    console.log(JSON.stringify(serializedMaze, null, 2));
+    drawSerializedMaze();
   });
 
   onDestroy(() => {
