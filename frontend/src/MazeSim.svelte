@@ -14,7 +14,7 @@
   let savedFiles = [];
   var serializedMaze = []; // Use reactive to watch changes
   $: userCurrentEmail = $userEmail; 
-
+  let initialized = false;
   let robotRow = 0;
   let robotCol = 0;
 
@@ -128,6 +128,9 @@ function removeWalls(a, b) {
   
 
 function drawSerializedMaze() {
+    if (p5Sketch) {
+        p5Sketch.remove(); // Ensure no duplicate sketches
+    }
     new p5((p) => {
         const wid = 25; // Width and height of each cell
         const cols = 16; // Number of columns
@@ -159,13 +162,28 @@ function drawSerializedMaze() {
     }, mazeContainer);
 }
 
+$: if (showSoftware) {
+  if (p5Sketch) {
+    p5Sketch.remove(); // Remove existing sketch if any
+  }
+  // Delay the sketch initialization to ensure `mazeContainer` is available
+  setTimeout(() => {
+    drawSerializedMaze();
+  }, 0);
+} else {
+  if (p5Sketch) {
+    p5Sketch.remove();
+    p5Sketch = null;
+  }
+}
+
 
   // Modified Cell function to accept and draw based on serialized data
 
   onMount(() => {
     serializedMaze = generateMaze(16, 16); // Generate maze with 16x16 grid
     console.log(JSON.stringify(serializedMaze, null, 2));
-    drawSerializedMaze();
+    //drawSerializedMaze();
   });
 
   onDestroy(() => {
