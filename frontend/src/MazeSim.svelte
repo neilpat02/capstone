@@ -31,6 +31,7 @@
             // Check if the cell is the initial robot position
             cell.isRobotHere = i === robotRow && j === robotCol;
             cell.robotVisited = cell.isRobotHere; // Assume robot starts here and marks it as visited
+            cell.robotDirection = cell.isRobotHere ? 'N' : null; // Robot faces North initially
             grid.push(cell);
         }
     }
@@ -59,9 +60,11 @@
         j: cell.j,
         walls: cell.walls,
         isRobotHere: cell.isRobotHere,
-        robotVisited: cell.robotVisited
+        robotVisited: cell.robotVisited,
+        robotDirection: cell.robotDirection // Include the robot's direction
     }));
 }
+
 
 class Cell {
     constructor(i, j, cols, rows, grid) {
@@ -132,7 +135,7 @@ function drawSerializedMaze() {
         p5Sketch.remove(); // Ensure no duplicate sketches
     }
     new p5((p) => {
-        const wid = 25; // Width and height of each cell
+        const wid = 30; // Width and height of each cell
         const cols = 16; // Number of columns
         const rows = 16; // Number of rows
 
@@ -156,6 +159,34 @@ function drawSerializedMaze() {
                 if (cellData.isRobotHere) {
                     p.fill(255, 0, 0); // Set fill color to red
                     p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2); // Draw a circle in the middle of the cell
+
+                    // Draw a line for the robot's direction
+                    const directionLineLength = wid / 4; // Length of the direction indicator line
+                    let lineEndX = x + wid / 2;
+                    let lineEndY = y + wid / 2 - directionLineLength; // Default direction up (North)
+
+                    // Modify lineEndX and lineEndY based on robotDirection if available
+                    // Example: If the robot is facing East, adjust the line end point accordingly
+                    if (cellData.robotDirection) { // Assume 'robotDirection' is set to 'N', 'E', 'S', 'W'
+                        switch (cellData.robotDirection) {
+                            case 'E': // East
+                                lineEndX += directionLineLength;
+                                lineEndY += directionLineLength;
+                                break;
+                            case 'S': // South
+                                lineEndX -= directionLineLength;
+                                lineEndY += directionLineLength;
+                                break;
+                            case 'W': // West
+                                lineEndX -= directionLineLength;
+                                lineEndY -= directionLineLength;
+                                break;
+                            // Add more cases if needed
+                        }
+                    }
+
+                    p.stroke(255); // Set line color to white for visibility
+                    p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY); // Draw the direction line
                 }
             }
         };
@@ -392,10 +423,10 @@ $: if (showSoftware) {
   }
 
   .maze-container {
-    /* Styles to ensure the maze is displayed correctly */
-    text-align: center; /* Center the canvas if needed */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: #B71234 5px solid;
-    box-sizing: border-box;
     margin: 0 2rem 0 2rem;
   }
 
