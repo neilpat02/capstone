@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); //interface with MongoDB
 
+//userschema that is defined for every user. 
 const userSchema = new mongoose.Schema({
     teamName: {
         type: String,
@@ -26,6 +27,7 @@ const userSchema = new mongoose.Schema({
     
 });
 
+//each document will be a user with properties as declared in our schema
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

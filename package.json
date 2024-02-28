@@ -1,5 +1,12 @@
 {
   "dependencies": {
+<<<<<<< HEAD
     "ace": "^0.3.0"
+=======
+    "ace": "^0.0.2",
+    "ace-builds": "^1.32.5",
+    "cookie-parser": "^1.4.6",
+    "jsonwebtoken": "^9.0.2"
+>>>>>>> experimental
   }
 }

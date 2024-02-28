@@ -1,15 +1,17 @@
-require('dotenv').config();
-const express = require('express');
+require('dotenv').config(); //environment vars from file
+
+//importing necessary modules to run the server (backend)
+const express = require('express'); 
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const User = require('./User');
-const nodemailer = require('nodemailer');
-const SavedFile = require('./SavedFile'); // Import the SavedFile model
+const User = require('./User'); // path to the user schema
+const nodemailer = require('nodemailer'); 
+const SavedText = require('./SavedTexts'); // path to the savedText schema
 
 
-const app = express();
-const saltRounds = 10;
+const app = express(); 
+const saltRounds = 10; //factor used to hash passwords
 // Middleware to parse JSON bodies
 app.use(express.json());
 app.use(cors());
@@ -20,26 +22,26 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true,
 });
 
-// Define a simple route for testing
+// defining a route to test (can be deleted later)
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// Define the signup route
+// signup route
 app.post('/api/signup', async (req, res) => {
   try {
-      const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
-      const existingUser = await User.findOne({ email: req.body.email });
+      const hashedPassword = await bcrypt.hash(req.body.password, saltRounds); //hasing the passowrd the user enters
+      const existingUser = await User.findOne({ email: req.body.email }); // check if the user already exists based on the email
       if (existingUser) {
           return res.status(409).json({ message: "Email already exists" });
       }
-      const user = new User({
+      const user = new User({ //create a new user with the necessary details
           teamName: req.body.teamName,
           email: req.body.email,
           password: hashedPassword,
       });
 
-      const savedUser = await user.save();
+      const savedUser = await user.save(); //the user is saved to the DB 
 
       res.status(201).json({ user: { ...savedUser._doc, password: undefined } });
   } catch (error) {
@@ -67,25 +69,49 @@ app.post('/api/login', async (req, res) => {
     }
   });
 
-  // Assuming you have middleware to authenticate and set the user
-  app.post('/api/save-file', async (req, res) => {
+  // define the saved text route
+  app.post('/api/save-text', async (req, res) => {
+    const { userEmail, fileName, content } = req.body; 
+  
     try {
-      const { userId, fileName, content } = req.body;
-
-      // Create a new saved file document
-      const newFile = new SavedFile({
-        userId,
+      // check if the user exists in the User collection.
+      const userExists = await User.findOne({ email: userEmail });
+      if (!userExists) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      const newSavedText = new SavedText({ //create a new save text entry
+        userEmail,
         fileName,
         content
       });
-
-      await newFile.save();
-      res.status(201).json({ message: 'File saved successfully' });
+  
+      await newSavedText.save(); //save that new entry 
+      res.status(201).json({ message: 'Text saved successfully' });
     } catch (error) {
-      console.error('Error saving file:', error);
-      res.status(500).json({ message: 'Failed to save file' });
+      console.error('Error saving text:', error);
+      res.status(500).json({ message: 'Failed to save text' });
     }
   });
+
+  app.get('/api/get-texts', async (req, res) => {
+    const { userEmail } = req.query; // Obtain userEmail from query parameters
+
+    try {
+        const texts = await SavedText.find({ userEmail: userEmail });
+        if (!texts) {
+            return res.status(404).json({ message: 'No texts found for the given user.' });
+        }
+        res.status(200).json(texts);
+    } catch (error) {
+        console.error('Error fetching texts:', error);
+        res.status(500).json({ message: 'Failed to fetch texts' });
+    }
+});
+
+  
+
+  //forgot password route 
   app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
   
@@ -117,6 +143,7 @@ app.post('/api/login', async (req, res) => {
   });
 
 
+  //function to send password reset email
   const sendResetEmail = (toEmail, resetToken) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -128,6 +155,7 @@ app.post('/api/login', async (req, res) => {
   
     const resetLink = `http://your-frontend-url/reset-password?token=${resetToken}`;
   
+    
     const mailOptions = {
       from: 'mazecomphero@gmail.com',
       to: toEmail,
@@ -135,6 +163,7 @@ app.post('/api/login', async (req, res) => {
       text: `Click the following link to reset your password: ${resetLink}`,
     };
   
+    //try to sent the email, and check for the status
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error('Error sending reset email:', error);
@@ -144,17 +173,18 @@ app.post('/api/login', async (req, res) => {
     });
   };
 
+  //defining the leaderboard route
   app.get('/api/leaderboard', async (req, res) => {
     const { type } = req.query; // `type` can be 'software' or 'hardware'
     try {
-        let sortCriteria = {};
+        let sortCriteria = {}; 
         if (type === 'software') {
-            sortCriteria = { softwareScore: -1 };
+            sortCriteria = { softwareScore: -1 }; //descending order 
         } else if (type === 'hardware') {
-            sortCriteria = { hardwareScore: -1 };
+            sortCriteria = { hardwareScore: -1 }; //descending order
         }
 
-        const leaderboardData = await User.find().sort(sortCriteria);
+        const leaderboardData = await User.find().sort(sortCriteria); //retrieve the score from the user data in the DB
         res.status(200).json(leaderboardData);
     } catch (error) {
         res.status(500).json({ message: error.message });

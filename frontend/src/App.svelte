@@ -1,5 +1,5 @@
 <script>
-	import { writable } from 'svelte/store';
+	import { writable } from 'svelte/store'; // necessary import statements for the application
 	import HomePage from "./HomePage.svelte";
 	import SignUp from "./SignUp.svelte";
 	import LoginPage from "./LoginPage.svelte";
@@ -8,17 +8,17 @@
 	import Contact from "./Contact.svelte";
 
 
-  let showDropdown = false;
+  let showDropdown = false; //show the dropdown menu for all of the webpages
   export let menu = 1;
-  const isLoggedIn = writable(false);
+  const isLoggedIn = writable(false); //track the state of the user's login / sign out
 
-    function handleLogout() {
-        isLoggedIn.set(false);
+    function handleLogout() {  //function to handle when the user presses "sign out"
+        isLoggedIn.set(false); 
         menu = 1; // Navigate to HomePage
         showDropdown = false; // Close dropdown on logout
     }
 
-    function toggleDropdown() {
+    function toggleDropdown() { //function to toggle dropdown
         showDropdown = !showDropdown;
     }
 

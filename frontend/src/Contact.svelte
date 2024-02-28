@@ -6,18 +6,18 @@
 	let email = "";
 	let message = "";
 
-	const handleSubmit = async () => {
+	const handleSubmit = async () => { 
 		try {
-		// Use your EmailJS template and service ID
+		// Use template for the text boxes
 		const templateParams = {
 			from_email: email,
 			to_email: 'mazecomphero@gmail.com',
 			message: message,
 		};
 
-		await emailjs.send('service_k9n8u89', 'template_z8jhgxg', templateParams, 'KuOnXFzA41_K7TY1A');
+		await emailjs.send('service_k9n8u89', 'template_z8jhgxg', templateParams, 'KuOnXFzA41_K7TY1A'); //send the email
 
-		alert('Email sent successfully!');
+		alert('Email sent successfully!'); //send successfully
 		} catch (error) {
 		console.error('Error sending email:', error);
 		alert('Error sending email. Please try again.');
