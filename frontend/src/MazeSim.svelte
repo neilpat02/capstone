@@ -291,12 +291,34 @@ $: if (showSoftware) {
     }
   }
 
-  function loadFileContent(event) {
-    const selectedFile = savedFiles.find(file => file.fileName === event.target.value);
+  async function loadFileContent(event) {
+    const selectedFileName = event.target.value;
+    const selectedFile = savedFiles.find(file => file.fileName === selectedFileName);
     if (selectedFile) {
-        editorText = selectedFile.content; // Load the selected file's content into the editor
+      try {
+        await navigator.clipboard.writeText(selectedFile.content);
+        console.log('File content copied to clipboard.');
+        alert('File content copied to clipboard.'); // Optional: Inform the user
+      } catch (error) {
+        console.error('Could not copy text to clipboard', error);
+        alert('Failed to copy file content to clipboard.');
+      }
+    } else {
+      console.error('Selected file content not found');
     }
   }
+  function toggleDropdownAnimation() {
+    const dropdown = document.querySelector('.file-dropdown');
+    if (dropdown) {
+      dropdown.classList.toggle('show'); // Toggle the 'show' class to apply the animation
+    }
+}
+
+async function handleFileButtonClick() {
+  await fetchSavedFiles();
+  toggleDropdownAnimation();
+}
+
 
 
 
@@ -344,7 +366,7 @@ $: if (showSoftware) {
         {:else}
           <div class="button-container">
             <button class="thin-button" on:click={promptForFileName}>Save</button>
-            <button class="thin-button" on:click={fetchSavedFiles}>File</button>
+            <button class="thin-button" on:click={handleFileButtonClick}>File</button>
             <button class="thin-button" on:click={displaySerializedMaze}>Run</button>
           </div>
         {/if}
@@ -393,15 +415,6 @@ $: if (showSoftware) {
     color: #fff; /* Set text color */
     cursor: pointer;
   }
-  .thin-button-left{
-    margin: 0 2rem; /* Remove default margin */
-    padding: 5px 10px; /* Adjust padding for your desired thickness */
-    border: none; /* Remove border */
-    background-color: #B71234; /* Set background color */
-    color: #fff; /* Set text color */
-    cursor: pointer;
-    margin-left: auto;
-  }
 
   /* Styles for the overall layout */
   .is-square {
@@ -436,5 +449,94 @@ $: if (showSoftware) {
   border-radius: 4px;
   border: 1px solid #ddd;
 }
+
+/* Add a keyframe for the appearance animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.file-name-input {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Add some space between the text box and the button */
+  animation: slideIn 0.5s ease-out; /* Use the defined animation */
+}
+
+.file-name-input input[type="text"] {
+  padding: 8px 10px;
+  border: 2px solid #B71234; /* A solid border to match the button color */
+  border-radius: 4px; /* Rounded corners for the text box */
+  transition: border-color 0.3s; /* Smooth transition for border color */
+  outline: none; /* Remove default focus outline */
+}
+
+.file-name-input input[type="text"]:focus {
+  border-color: #ff6363; /* Change border color on focus */
+}
+
+.file-name-input button {
+  padding: 8px 15px;
+  background-color: #B71234;
+  color: white;
+  border: none;
+  border-radius: 4px; /* Rounded corners for the button */
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s; /* Smooth transitions for hover effects */
+}
+
+.file-name-input button:hover {
+  background-color: #ff6363; /* Lighten the button color on hover */
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+.file-name-input button:active {
+  transform: translateY(1px); /* Push effect on click */
+}
+
+.file-dropdown {
+  appearance: none; /* Remove default browser styling */
+  width: 100%; /* Make dropdown full-width */
+  padding: 8px 12px;
+  background-color: #f2f2f2; /* Light background color */
+  border: 2px solid #B71234; /* Match the theme */
+  border-radius: 5px; /* Rounded corners */
+  font-size: 16px; /* Increase font size for better readability */
+  cursor: pointer; /* Change cursor to indicate it's clickable */
+  outline: none; /* Remove default focus outline */
+  transition: background-color 0.3s, border-color 0.3s; /* Smooth transition for background and border */
+}
+
+.file-dropdown:hover {
+  background-color: #e6e6e6; /* Slightly darker background on hover */
+}
+
+.file-dropdown:focus {
+  border-color: #ff6363; /* Highlighted border when focused */
+}
+
+.file-dropdown:active {
+  background-color: #cccccc; /* Even darker background when clicked */
+}
+
+/* Animation for dropdown appearance */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 
 </style>
