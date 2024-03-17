@@ -20,6 +20,33 @@
 
   let p5Sketch = null;
 
+  async function uploadToBot() {
+  // Since you already have userCurrentEmail reactive variable
+  try {
+    const response = await fetch('http://localhost:3000/api/upload-to-bot', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: userCurrentEmail, // Use the user's email to identify the team
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update timestamp');
+    }
+
+    const result = await response.json();
+    console.log(result.message); // Log the success message
+    alert('Upload to bot initiated and timestamp updated successfully.');
+  } catch (error) {
+    console.error('Error uploading to the bot:', error);
+    alert('Error in uploading to the bot. Please try again.');
+  }
+}
+
+
   function generateMaze(cols, rows) {
     let grid = [];
     let stack = [];
@@ -270,9 +297,6 @@ $: if (showSoftware) {
     showSoftware = !showSoftware;
   }
 
-  function uploadToBot() {
-    console.log('Uploading to the bot...');
-  }
 
 
   async function fetchSavedFiles() {
@@ -376,7 +400,19 @@ async function handleFileButtonClick() {
 {/if}
 
 {#if !showSoftware}
-  <!-- Existing Hardware section code... -->
+  <div class="is-flex is-justify-content-center is-align-items-center is-square" id="hardware-section">
+    <section class="section hardware-section">
+      <div style="background: darkgray;"class="has-text-centered">
+        <h1 class="title is-1">Hardware Section</h1>
+        <!-- Add  hardware-related content here when the time comes  -->
+      </div>
+    </section>
+  </div>
+  <div class="button-container">
+    <button class="thin-button">File</button>
+    <button class="thin-button">Save</button>
+    <button class="thin-button-left" on:click={uploadToBot}>Upload to bot</button>
+  </div>
 {/if}
 
 <div class="content has-text-centered">
@@ -523,6 +559,26 @@ async function handleFileButtonClick() {
 
 .file-dropdown:active {
   background-color: #cccccc; /* Even darker background when clicked */
+}
+
+.thin-button-left {
+  margin: 0; /* Remove default margin */
+  padding: 10px 20px; /* Adjust padding to make the button more prominent */
+  border: none; /* Remove border */
+  background-color: #4CAF50; /* A distinct, eye-catching color */
+  color: white; /* Set text color to white for contrast */
+  cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
+  transition: background-color 0.3s, box-shadow 0.2s, transform 0.1s; /* Smooth transitions for interactive effects */
+  border-radius: 5px; /* Rounded corners for a modern look */
+}
+
+.thin-button-left:hover {
+  background-color: #45a049; /* Darken the button color slightly on hover */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19); /* Add shadow for depth */
+}
+
+.thin-button-left:active {
+  transform: translateY(2px); /* Slight push effect when clicked */
 }
 
 /* Animation for dropdown appearance */
