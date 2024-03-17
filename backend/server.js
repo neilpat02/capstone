@@ -69,30 +69,38 @@ app.post('/api/login', async (req, res) => {
     }
   });
 
-  // define the saved text route
   app.post('/api/save-text', async (req, res) => {
-    const { userEmail, fileName, content } = req.body; 
+    const { userEmail, fileName, content } = req.body;
   
     try {
-      // check if the user exists in the User collection.
       const userExists = await User.findOne({ email: userEmail });
       if (!userExists) {
         return res.status(404).json({ message: 'User not found' });
       }
   
-      const newSavedText = new SavedText({ //create a new save text entry
-        userEmail,
-        fileName,
-        content
-      });
-  
-      await newSavedText.save(); //save that new entry 
-      res.status(201).json({ message: 'Text saved successfully' });
+      // Check if a saved text with the same fileName and userEmail already exists
+      let savedText = await SavedText.findOne({ userEmail, fileName });
+      if (savedText) {
+        // If it exists, update the content
+        savedText.content = content;
+        await savedText.save();
+        res.status(200).json({ message: 'Text updated successfully' });
+      } else {
+        // If it doesn't exist, create a new SavedText document
+        const newSavedText = new SavedText({
+          userEmail,
+          fileName,
+          content
+        });
+        await newSavedText.save();
+        res.status(201).json({ message: 'Text saved successfully' });
+      }
     } catch (error) {
-      console.error('Error saving text:', error);
-      res.status(500).json({ message: 'Failed to save text' });
+      console.error('Error saving or updating text:', error);
+      res.status(500).json({ message: 'Failed to save or update text' });
     }
   });
+  
 
   app.get('/api/get-texts', async (req, res) => {
     const { userEmail } = req.query; // Obtain userEmail from query parameters
@@ -190,6 +198,28 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ message: error.message });
     }
   });
+
+  app.post('/api/upload-to-bot', async (req, res) => {
+    const { email } = req.body; // Expecting user's email to be sent in the request body
+    const timestamp = new Date(); // Get current server timestamp
+  
+    try {
+      const user = await User.findOneAndUpdate({ email: email }, {
+        $set: { lastUploadToBotTimestamp: timestamp }
+      }, { new: true }); // Update the user document with the new timestamp
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+      }
+  
+      res.status(200).json({ message: `Upload to bot timestamp updated for user with email ${email}.` });
+    } catch (error) {
+      console.error('Error updating upload to bot timestamp:', error);
+      res.status(500).json({ message: 'Failed to update upload to bot timestamp.' });
+    }
+  });
+  
+  
 
 // Start the server
 const PORT = process.env.PORT || 3000;

@@ -14,11 +14,38 @@
   let savedFiles = [];
   var serializedMaze = []; // Use reactive to watch changes
   $: userCurrentEmail = $userEmail; 
-
+  let initialized = false;
   let robotRow = 0;
   let robotCol = 0;
 
   let p5Sketch = null;
+
+  async function uploadToBot() {
+  // Since you already have userCurrentEmail reactive variable
+  try {
+    const response = await fetch('http://localhost:3000/api/upload-to-bot', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: userCurrentEmail, // Use the user's email to identify the team
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update timestamp');
+    }
+
+    const result = await response.json();
+    console.log(result.message); // Log the success message
+    alert('Upload to bot initiated and timestamp updated successfully.');
+  } catch (error) {
+    console.error('Error uploading to the bot:', error);
+    alert('Error in uploading to the bot. Please try again.');
+  }
+}
+
 
   function generateMaze(cols, rows) {
     let grid = [];
@@ -31,6 +58,7 @@
             // Check if the cell is the initial robot position
             cell.isRobotHere = i === robotRow && j === robotCol;
             cell.robotVisited = cell.isRobotHere; // Assume robot starts here and marks it as visited
+            cell.robotDirection = cell.isRobotHere ? 'N' : null; // Robot faces North initially
             grid.push(cell);
         }
     }
@@ -59,9 +87,11 @@
         j: cell.j,
         walls: cell.walls,
         isRobotHere: cell.isRobotHere,
-        robotVisited: cell.robotVisited
+        robotVisited: cell.robotVisited,
+        robotDirection: cell.robotDirection // Include the robot's direction
     }));
 }
+
 
 class Cell {
     constructor(i, j, cols, rows, grid) {
@@ -128,8 +158,11 @@ function removeWalls(a, b) {
   
 
 function drawSerializedMaze() {
+    if (p5Sketch) {
+        p5Sketch.remove(); // Ensure no duplicate sketches
+    }
     new p5((p) => {
-        const wid = 25; // Width and height of each cell
+        const wid = 30; // Width and height of each cell
         const cols = 16; // Number of columns
         const rows = 16; // Number of rows
 
@@ -153,10 +186,53 @@ function drawSerializedMaze() {
                 if (cellData.isRobotHere) {
                     p.fill(255, 0, 0); // Set fill color to red
                     p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2); // Draw a circle in the middle of the cell
+
+                    // Draw a line for the robot's direction
+                    const directionLineLength = wid / 4; // Length of the direction indicator line
+                    let lineEndX = x + wid / 2;
+                    let lineEndY = y + wid / 2 - directionLineLength; // Default direction up (North)
+
+                    // Modify lineEndX and lineEndY based on robotDirection if available
+                    // Example: If the robot is facing East, adjust the line end point accordingly
+                    if (cellData.robotDirection) { // Assume 'robotDirection' is set to 'N', 'E', 'S', 'W'
+                        switch (cellData.robotDirection) {
+                            case 'E': // East
+                                lineEndX += directionLineLength;
+                                lineEndY += directionLineLength;
+                                break;
+                            case 'S': // South
+                                lineEndX -= directionLineLength;
+                                lineEndY += directionLineLength;
+                                break;
+                            case 'W': // West
+                                lineEndX -= directionLineLength;
+                                lineEndY -= directionLineLength;
+                                break;
+                            // Add more cases if needed
+                        }
+                    }
+
+                    p.stroke(255); // Set line color to white for visibility
+                    p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY); // Draw the direction line
                 }
             }
         };
     }, mazeContainer);
+}
+
+$: if (showSoftware) {
+  if (p5Sketch) {
+    p5Sketch.remove(); // Remove existing sketch if any
+  }
+  // Delay the sketch initialization to ensure `mazeContainer` is available
+  setTimeout(() => {
+    drawSerializedMaze();
+  }, 0);
+} else {
+  if (p5Sketch) {
+    p5Sketch.remove();
+    p5Sketch = null;
+  }
 }
 
 
@@ -165,7 +241,7 @@ function drawSerializedMaze() {
   onMount(() => {
     serializedMaze = generateMaze(16, 16); // Generate maze with 16x16 grid
     console.log(JSON.stringify(serializedMaze, null, 2));
-    drawSerializedMaze();
+    //drawSerializedMaze();
   });
 
   onDestroy(() => {
@@ -221,9 +297,6 @@ function drawSerializedMaze() {
     showSoftware = !showSoftware;
   }
 
-  function uploadToBot() {
-    console.log('Uploading to the bot...');
-  }
 
 
   async function fetchSavedFiles() {
@@ -242,14 +315,27 @@ function drawSerializedMaze() {
     }
   }
 
-  function loadFileContent(event) {
-    const selectedFile = savedFiles.find(file => file.fileName === event.target.value);
+  async function loadFileContent(event) {
+    const selectedFileName = event.target.value;
+    const selectedFile = savedFiles.find(file => file.fileName === selectedFileName);
     if (selectedFile) {
-        editorText = selectedFile.content; // Load the selected file's content into the editor
+      try {
+        await navigator.clipboard.writeText(selectedFile.content);
+        console.log('File content copied to clipboard.');
+        alert('File content copied to clipboard.'); // Optional: Inform the user
+      } catch (error) {
+        console.error('Could not copy text to clipboard', error);
+        alert('Failed to copy file content to clipboard.');
+      }
+    } else {
+      console.error('Selected file content not found');
     }
   }
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> 41ed070f36539b91c47960dccc8acf6a986f29f5
   function toggleDropdownAnimation() {
     const dropdown = document.querySelector('.file-dropdown');
     if (dropdown) {
@@ -262,6 +348,7 @@ async function handleFileButtonClick() {
   toggleDropdownAnimation();
 }
 
+<<<<<<< HEAD
 async function runSimulation() {
     const algorithmCode = 'print("hello world")'; // Your algorithm code here
     const serializedMaze = [
@@ -3620,6 +3707,8 @@ async function runSimulation() {
 }
 
 >>>>>>> Stashed changes
+=======
+>>>>>>> 41ed070f36539b91c47960dccc8acf6a986f29f5
 
 
 
@@ -3667,8 +3756,12 @@ async function runSimulation() {
         {:else}
           <div class="button-container">
             <button class="thin-button" on:click={promptForFileName}>Save</button>
+<<<<<<< HEAD
 <<<<<<< Updated upstream
             <button class="thin-button" on:click={fetchSavedFiles}>File</button>
+=======
+            <button class="thin-button" on:click={handleFileButtonClick}>File</button>
+>>>>>>> 41ed070f36539b91c47960dccc8acf6a986f29f5
             <button class="thin-button" on:click={displaySerializedMaze}>Run</button>
 =======
             <button class="thin-button" on:click={handleFileButtonClick}>File</button>
@@ -3682,7 +3775,19 @@ async function runSimulation() {
 {/if}
 
 {#if !showSoftware}
-  <!-- Existing Hardware section code... -->
+  <div class="is-flex is-justify-content-center is-align-items-center is-square" id="hardware-section">
+    <section class="section hardware-section">
+      <div style="background: darkgray;"class="has-text-centered">
+        <h1 class="title is-1">Hardware Section</h1>
+        <!-- Add  hardware-related content here when the time comes  -->
+      </div>
+    </section>
+  </div>
+  <div class="button-container">
+    <button class="thin-button">File</button>
+    <button class="thin-button">Save</button>
+    <button class="thin-button-left" on:click={uploadToBot}>Upload to bot</button>
+  </div>
 {/if}
 
 <div class="content has-text-centered">
@@ -3721,15 +3826,6 @@ async function runSimulation() {
     color: #fff; /* Set text color */
     cursor: pointer;
   }
-  .thin-button-left{
-    margin: 0 2rem; /* Remove default margin */
-    padding: 5px 10px; /* Adjust padding for your desired thickness */
-    border: none; /* Remove border */
-    background-color: #B71234; /* Set background color */
-    color: #fff; /* Set text color */
-    cursor: pointer;
-    margin-left: auto;
-  }
 
   /* Styles for the overall layout */
   .is-square {
@@ -3751,10 +3847,10 @@ async function runSimulation() {
   }
 
   .maze-container {
-    /* Styles to ensure the maze is displayed correctly */
-    text-align: center; /* Center the canvas if needed */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: #B71234 5px solid;
-    box-sizing: border-box;
     margin: 0 2rem 0 2rem;
   }
 
@@ -3764,5 +3860,114 @@ async function runSimulation() {
   border-radius: 4px;
   border: 1px solid #ddd;
 }
+
+/* Add a keyframe for the appearance animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.file-name-input {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Add some space between the text box and the button */
+  animation: slideIn 0.5s ease-out; /* Use the defined animation */
+}
+
+.file-name-input input[type="text"] {
+  padding: 8px 10px;
+  border: 2px solid #B71234; /* A solid border to match the button color */
+  border-radius: 4px; /* Rounded corners for the text box */
+  transition: border-color 0.3s; /* Smooth transition for border color */
+  outline: none; /* Remove default focus outline */
+}
+
+.file-name-input input[type="text"]:focus {
+  border-color: #ff6363; /* Change border color on focus */
+}
+
+.file-name-input button {
+  padding: 8px 15px;
+  background-color: #B71234;
+  color: white;
+  border: none;
+  border-radius: 4px; /* Rounded corners for the button */
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s; /* Smooth transitions for hover effects */
+}
+
+.file-name-input button:hover {
+  background-color: #ff6363; /* Lighten the button color on hover */
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+.file-name-input button:active {
+  transform: translateY(1px); /* Push effect on click */
+}
+
+.file-dropdown {
+  appearance: none; /* Remove default browser styling */
+  width: 100%; /* Make dropdown full-width */
+  padding: 8px 12px;
+  background-color: #f2f2f2; /* Light background color */
+  border: 2px solid #B71234; /* Match the theme */
+  border-radius: 5px; /* Rounded corners */
+  font-size: 16px; /* Increase font size for better readability */
+  cursor: pointer; /* Change cursor to indicate it's clickable */
+  outline: none; /* Remove default focus outline */
+  transition: background-color 0.3s, border-color 0.3s; /* Smooth transition for background and border */
+}
+
+.file-dropdown:hover {
+  background-color: #e6e6e6; /* Slightly darker background on hover */
+}
+
+.file-dropdown:focus {
+  border-color: #ff6363; /* Highlighted border when focused */
+}
+
+.file-dropdown:active {
+  background-color: #cccccc; /* Even darker background when clicked */
+}
+
+.thin-button-left {
+  margin: 0; /* Remove default margin */
+  padding: 10px 20px; /* Adjust padding to make the button more prominent */
+  border: none; /* Remove border */
+  background-color: #4CAF50; /* A distinct, eye-catching color */
+  color: white; /* Set text color to white for contrast */
+  cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
+  transition: background-color 0.3s, box-shadow 0.2s, transform 0.1s; /* Smooth transitions for interactive effects */
+  border-radius: 5px; /* Rounded corners for a modern look */
+}
+
+.thin-button-left:hover {
+  background-color: #45a049; /* Darken the button color slightly on hover */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19); /* Add shadow for depth */
+}
+
+.thin-button-left:active {
+  transform: translateY(2px); /* Slight push effect when clicked */
+}
+
+/* Animation for dropdown appearance */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 
 </style>

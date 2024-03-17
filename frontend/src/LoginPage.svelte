@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import Footer from "./widget/Footer.svelte";
   import Navi from "./widget/Navi.svelte";
-  import { userEmail } from './userStore.js';
+  import { userEmail} from './userStore.js';
 
   const dispatch = createEventDispatcher();
   let email = '';
