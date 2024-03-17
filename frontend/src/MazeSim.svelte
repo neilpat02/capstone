@@ -345,6 +345,33 @@ async function handleFileButtonClick() {
 
 
 
+async function runSimulation() {
+    const algorithmCode = editorText; // Your algorithm code here)
+    const serializedMazeSent = serializedMaze;
+    try {
+        const response = await fetch('http://localhost:5001/run', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                algorithm_code: algorithmCode,
+                serializedMaze: serializedMazeSent,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Simulation result:', data);
+        // Update your front-end accordingly with the received data
+    } catch (error) {
+        console.error('Error running simulation:', error);
+    }
+}
+
 
 </script>
 
@@ -391,7 +418,7 @@ async function handleFileButtonClick() {
           <div class="button-container">
             <button class="thin-button" on:click={promptForFileName}>Save</button>
             <button class="thin-button" on:click={handleFileButtonClick}>File</button>
-            <button class="thin-button" on:click={displaySerializedMaze}>Run</button>
+            <button class="thin-button" on:click={runSimulation}>Run</button>
           </div>
         {/if}
       </div>
