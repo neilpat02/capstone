@@ -199,6 +199,28 @@ app.post('/api/login', async (req, res) => {
     }
   });
 
+  app.post('/api/upload-to-bot', async (req, res) => {
+    const { email } = req.body; // Expecting user's email to be sent in the request body
+    const timestamp = new Date(); // Get current server timestamp
+  
+    try {
+      const user = await User.findOneAndUpdate({ email: email }, {
+        $set: { lastUploadToBotTimestamp: timestamp }
+      }, { new: true }); // Update the user document with the new timestamp
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+      }
+  
+      res.status(200).json({ message: `Upload to bot timestamp updated for user with email ${email}.` });
+    } catch (error) {
+      console.error('Error updating upload to bot timestamp:', error);
+      res.status(500).json({ message: 'Failed to update upload to bot timestamp.' });
+    }
+  });
+  
+  
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

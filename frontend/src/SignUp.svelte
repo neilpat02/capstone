@@ -3,6 +3,7 @@
 	import Footer from "./widget/Footer.svelte";
 	import Navi from "./widget/Navi.svelte";
     import { createEventDispatcher } from 'svelte';
+    import { team} from './userStore.js';
     let teamName = '';
     let email = '';
     let password = '';

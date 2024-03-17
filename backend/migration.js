@@ -1,33 +1,34 @@
-// migration.js
 require('dotenv').config();
 const mongoose = require('mongoose');
-const User = require('./User'); // Assuming this is your User model
+const User = require('./User');
 
-async function addScoreFieldsToUsers() {
+async function addFieldsToUsers() {
     try {
-        // Connect to MongoDB
         await mongoose.connect(process.env.MONGO_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
 
-        // Fetch all users
         const users = await User.find();
-
-        // Iterate over each user and add the 'softwareScore' and 'hardwareScore' fields if they don't exist
         for (const user of users) {
-            let updated = false;
-            if (typeof user.softwareScore === 'undefined') {
-                user.softwareScore = 0; // Set default software score
-                updated = true;
+            let needsUpdate = false;
+            if (user.softwareScore === undefined) {
+                user.softwareScore = 0;
+                needsUpdate = true;
             }
-            if (typeof user.hardwareScore === 'undefined') {
-                user.hardwareScore = 0; // Set default hardware score
-                updated = true;
+            if (user.hardwareScore === undefined) {
+                user.hardwareScore = 0;
+                needsUpdate = true;
+            }
+            // Instead of checking for undefined, force update or set a past default date
+            if (user.lastUploadToBotTimestamp === null || user.lastUploadToBotTimestamp === undefined) {
+                user.lastUploadToBotTimestamp = new Date("1970-01-01"); // Setting a default past date
+                needsUpdate = true;
             }
 
-            // Save the user document if it was updated
-            if (updated) {
+            if (needsUpdate) {
+                // Mark as modified if necessary
+                user.markModified('lastUploadToBotTimestamp');
                 await user.save();
                 console.log(`Updated user ${user.email}`);
             }
@@ -37,9 +38,8 @@ async function addScoreFieldsToUsers() {
     } catch (error) {
         console.error('Migration failed:', error);
     } finally {
-        // Close the MongoDB connection
         mongoose.connection.close();
     }
 }
 
-addScoreFieldsToUsers();
+addFieldsToUsers();

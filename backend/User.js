@@ -15,7 +15,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-
     softwareScore: {
         type: Number,
         default: 10
@@ -23,9 +22,14 @@ const userSchema = new mongoose.Schema({
     hardwareScore: {
         type: Number,
         default: 0
+    },
+    // Add this field to record the last upload to bot timestamp
+    lastUploadToBotTimestamp: {
+        type: Date,
+        default: null // Default is null, indicating no upload has been made yet
     }
-    
 });
+
 
 //each document will be a user with properties as declared in our schema
 const User = mongoose.model('User', userSchema);
