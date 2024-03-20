@@ -174,9 +174,16 @@ function drawSerializedMaze() {
             for (let cellData of serializedMaze) {
                 const x = cellData.i * wid;
                 const y = cellData.j * wid;
-                p.stroke(0); // Set stroke color for drawing walls
+
+                // Check if the cell is visited by the robot
+                if (cellData.robotVisited) {
+                    p.fill(255, 0, 0, 100); // Set fill color to red with transparency
+                    p.noStroke(); // No stroke for cell border
+                    p.rect(x, y, wid, wid); // Draw the entire cell with red tint
+                }
 
                 // Draw walls based on the cell data
+                p.stroke(0); // Set stroke color for drawing walls
                 if (cellData.walls[0]) p.line(x, y, x + wid, y); // Top wall
                 if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid); // Right wall
                 if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid); // Bottom wall
@@ -219,6 +226,8 @@ function drawSerializedMaze() {
         };
     }, mazeContainer);
 }
+
+
 
 $: if (showSoftware) {
   if (p5Sketch) {
