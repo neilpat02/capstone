@@ -22,6 +22,7 @@
 
   async function uploadToBot() {
   // Since you already have userCurrentEmail reactive variable
+  alert('Code to upload:\n' + editorText);
   try {
     const response = await fetch('http://localhost:3000/api/upload-to-bot', {
       method: 'POST',
@@ -44,6 +45,31 @@
     console.error('Error uploading to the bot:', error);
     alert('Error in uploading to the bot. Please try again.');
   }
+
+  try {
+      const flaskResponse = await fetch('http://localhost:5001/upload_to_bot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          algorithm_code: editorText, // Send the code from the editor
+          serializedMaze: serializedMaze, // Assuming serializedMaze is also required by your Flask backend
+        }),
+      });
+
+      if (!flaskResponse.ok) {
+        throw new Error('Failed to send code to Flask backend');
+      }
+
+      const flaskResult = await flaskResponse.json();
+      console.log('Code sent to Flask backend:', flaskResult);
+      alert('Code uploaded to bot successfully.');
+    } catch (flaskError) {
+      console.error('Error sending code to Flask backend:', flaskError);
+      alert('Failed to upload code to bot. Please try again.');
+    }
+
 }
 
 
