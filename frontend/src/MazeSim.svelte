@@ -186,91 +186,76 @@ function removeWalls(a, b) {
   
 
 function drawSerializedMaze() {
-    if (p5Sketch) {
-        p5Sketch.remove(); // Ensure no duplicate sketches
-    }
-    new p5((p) => {
-        const wid = 30; // Width and height of each cell
-        const cols = 16; // Number of columns
-        const rows = 16; // Number of rows
-
-        p.setup = () => {
-            p.createCanvas(cols * wid, rows * wid);
-            p.background(255);
-
-            // Iterate over each cell in the serialized maze data
-            for (let cellData of serializedMaze) {
-                const x = cellData.i * wid;
-                const y = cellData.j * wid;
-
-                // Check if the cell is visited by the robot
-                if (cellData.robotVisited) {
-                    p.fill(255, 0, 0, 100); // Set fill color to red with transparency
-                    p.noStroke(); // No stroke for cell border
-                    p.rect(x, y, wid, wid); // Draw the entire cell with red tint
-                }
-
-                // Draw walls based on the cell data
-                p.stroke(0); // Set stroke color for drawing walls
-                if (cellData.walls[0]) p.line(x, y, x + wid, y); // Top wall
-                if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid); // Right wall
-                if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid); // Bottom wall
-                if (cellData.walls[3]) p.line(x, y + wid, x, y); // Left wall
-
-                // Check if the cell is the robot's current position
-                if (cellData.isRobotHere) {
-                    p.fill(255, 0, 0); // Set fill color to red
-                    p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2); // Draw a circle in the middle of the cell
-
-                    // Draw a line for the robot's direction
-                    const directionLineLength = wid / 4; // Length of the direction indicator line
-                    let lineEndX = x + wid / 2;
-                    let lineEndY = y + wid / 2 - directionLineLength; // Default direction up (North)
-
-                    // Modify lineEndX and lineEndY based on robotDirection if available
-                    // Example: If the robot is facing East, adjust the line end point accordingly
-                    if (cellData.robotDirection) { // Assume 'robotDirection' is set to 'N', 'E', 'S', 'W'
-                        switch (cellData.robotDirection) {
-                            case 'E': // East
-                                lineEndX += directionLineLength;
-                                lineEndY += directionLineLength;
-                                break;
-                            case 'S': // South
-                                lineEndX -= directionLineLength;
-                                lineEndY += directionLineLength;
-                                break;
-                            case 'W': // West
-                                lineEndX -= directionLineLength;
-                                lineEndY -= directionLineLength;
-                                break;
-                            // Add more cases if needed
-                        }
-                    }
-
-                    p.stroke(255); // Set line color to white for visibility
-                    p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY); // Draw the direction line
-                }
+  if (!p5Sketch) {
+    p5Sketch = new p5((p) => {
+      const wid = 30; // Width and height of each cell
+      const cols = 16; // Number of columns
+      const rows = 16; // Number of rows
+      
+      p.setup = () => {
+        p.createCanvas(cols * wid, rows * wid);
+        p.noLoop();
+      };
+      
+      const drawMaze = () => {
+        p.background(255);
+        
+        serializedMaze.forEach(cellData => {
+          const x = cellData.i * wid;
+          const y = cellData.j * wid;
+          
+          if (cellData.robotVisited) {
+            p.fill(255, 0, 0, 100);
+            p.noStroke();
+            p.rect(x, y, wid, wid);
+          }
+          
+          p.stroke(0);
+          if (cellData.walls[0]) p.line(x, y, x + wid, y);
+          if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid);
+          if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid);
+          if (cellData.walls[3]) p.line(x, y + wid, x, y);
+          
+          if (cellData.isRobotHere) {
+            p.fill(255, 0, 0);
+            p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
+            
+            let lineEndX = x + wid / 2;
+            let lineEndY = y + wid / 2;
+            const directionLineLength = wid / 4;
+            switch (cellData.robotDirection) {
+              case 'N':
+                lineEndY -= directionLineLength;
+                break;
+              case 'E':
+                lineEndX += directionLineLength;
+                break;
+              case 'S':
+                lineEndY += directionLineLength;
+                break;
+              case 'W':
+                lineEndX -= directionLineLength;
+                break;
             }
-        };
+            p.stroke(255); // White for visibility
+            p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY);
+          }
+        });
+      };
+      
+      p.draw = drawMaze;
     }, mazeContainer);
+  } else {
+    p5Sketch.redraw();
+  }
 }
 
 
 
-$: if (showSoftware) {
-  if (p5Sketch) {
-    p5Sketch.remove(); // Remove existing sketch if any
-  }
-  // Delay the sketch initialization to ensure `mazeContainer` is available
-  setTimeout(() => {
+
+  $: if (serializedMaze && mazeContainer) {
     drawSerializedMaze();
-  }, 0);
-} else {
-  if (p5Sketch) {
-    p5Sketch.remove();
-    p5Sketch = null;
   }
-}
 
 
   // Modified Cell function to accept and draw based on serialized data
