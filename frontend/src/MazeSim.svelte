@@ -4,8 +4,10 @@
   import AceEditor from "./widget/ace_builds.svelte";
   import { userEmail } from './userStore.js';
   import { onDestroy, onMount } from 'svelte';
-  import p5 from 'p5'; //p5 library for the graphical representation of the maze 
+  import p5 from 'p5'; //p5 library for the graphical representation of the maze
+  import io from 'socket.io-client'; 
 
+  const socket = io('http://localhost:5001'); 
   let showSoftware = true; //show the software section by default
   let mazeContainer;
   let editorText = ""; //track the code that is written
@@ -274,11 +276,17 @@ $: if (showSoftware) {
   // Modified Cell function to accept and draw based on serialized data
 
   onMount(() => {
-    serializedMaze = generateMaze(16, 16); // Generate maze with 16x16 grid
-    console.log(JSON.stringify(serializedMaze, null, 2));
-    //drawSerializedMaze();
+  // Listen for 'update_maze' event from the server
+  socket.on('update_maze', (data) => {
+    console.log('Received updated maze:', data);
+    serializedMaze = data.updatedMaze; // Update your maze data
+    drawSerializedMaze(); // Re-draw the maze with the updated data
   });
 
+  serializedMaze = generateMaze(16, 16); // Initial maze generation, you can remove this if you'll receive the initial state from the server as well
+  drawSerializedMaze(); // You might want to comment this out if you're expecting the initial state from the server
+  });
+  
   onDestroy(() => {
     if (p5Sketch) {
       p5Sketch.remove();
