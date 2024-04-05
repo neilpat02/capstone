@@ -4,8 +4,10 @@
   import AceEditor from "./widget/ace_builds.svelte";
   import { userEmail } from './userStore.js';
   import { onDestroy, onMount } from 'svelte';
-  import p5 from 'p5'; //p5 library for the graphical representation of the maze 
+  import p5 from 'p5'; //p5 library for the graphical representation of the maze
+  import io from 'socket.io-client'; 
 
+  const socket = io('http://localhost:5001'); 
   let showSoftware = true; //show the software section by default
   let mazeContainer;
   let editorText = ""; //track the code that is written
@@ -22,6 +24,7 @@
 
   async function uploadToBot() {
   // Since you already have userCurrentEmail reactive variable
+  alert('Code to upload:\n' + editorText);
   try {
     const response = await fetch('http://localhost:3000/api/upload-to-bot', {
       method: 'POST',
@@ -44,6 +47,31 @@
     console.error('Error uploading to the bot:', error);
     alert('Error in uploading to the bot. Please try again.');
   }
+
+  try {
+      const flaskResponse = await fetch('http://localhost:5001/upload_to_bot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          algorithm_code: editorText, // Send the code from the editor
+          serializedMaze: serializedMaze, // Assuming serializedMaze is also required by your Flask backend
+        }),
+      });
+
+      if (!flaskResponse.ok) {
+        throw new Error('Failed to send code to Flask backend');
+      }
+
+      const flaskResult = await flaskResponse.json();
+      console.log('Code sent to Flask backend:', flaskResult);
+      alert('Code uploaded to bot successfully.');
+    } catch (flaskError) {
+      console.error('Error sending code to Flask backend:', flaskError);
+      alert('Failed to upload code to bot. Please try again.');
+    }
+
 }
 
 
@@ -158,92 +186,92 @@ function removeWalls(a, b) {
   
 
 function drawSerializedMaze() {
-    if (p5Sketch) {
-        p5Sketch.remove(); // Ensure no duplicate sketches
-    }
-    new p5((p) => {
-        const wid = 30; // Width and height of each cell
-        const cols = 16; // Number of columns
-        const rows = 16; // Number of rows
-
-        p.setup = () => {
-            p.createCanvas(cols * wid, rows * wid);
-            p.background(255);
-
-            // Iterate over each cell in the serialized maze data
-            for (let cellData of serializedMaze) {
-                const x = cellData.i * wid;
-                const y = cellData.j * wid;
-                p.stroke(0); // Set stroke color for drawing walls
-
-                // Draw walls based on the cell data
-                if (cellData.walls[0]) p.line(x, y, x + wid, y); // Top wall
-                if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid); // Right wall
-                if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid); // Bottom wall
-                if (cellData.walls[3]) p.line(x, y + wid, x, y); // Left wall
-
-                // Check if the cell is the robot's current position
-                if (cellData.isRobotHere) {
-                    p.fill(255, 0, 0); // Set fill color to red
-                    p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2); // Draw a circle in the middle of the cell
-
-                    // Draw a line for the robot's direction
-                    const directionLineLength = wid / 4; // Length of the direction indicator line
-                    let lineEndX = x + wid / 2;
-                    let lineEndY = y + wid / 2 - directionLineLength; // Default direction up (North)
-
-                    // Modify lineEndX and lineEndY based on robotDirection if available
-                    // Example: If the robot is facing East, adjust the line end point accordingly
-                    if (cellData.robotDirection) { // Assume 'robotDirection' is set to 'N', 'E', 'S', 'W'
-                        switch (cellData.robotDirection) {
-                            case 'E': // East
-                                lineEndX += directionLineLength;
-                                lineEndY += directionLineLength;
-                                break;
-                            case 'S': // South
-                                lineEndX -= directionLineLength;
-                                lineEndY += directionLineLength;
-                                break;
-                            case 'W': // West
-                                lineEndX -= directionLineLength;
-                                lineEndY -= directionLineLength;
-                                break;
-                            // Add more cases if needed
-                        }
-                    }
-
-                    p.stroke(255); // Set line color to white for visibility
-                    p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY); // Draw the direction line
-                }
+  if (!p5Sketch) {
+    p5Sketch = new p5((p) => {
+      const wid = 30; // Width and height of each cell
+      const cols = 16; // Number of columns
+      const rows = 16; // Number of rows
+      
+      p.setup = () => {
+        p.createCanvas(cols * wid, rows * wid);
+        p.noLoop();
+      };
+      
+      const drawMaze = () => {
+        p.background(255);
+        
+        serializedMaze.forEach(cellData => {
+          const x = cellData.i * wid;
+          const y = cellData.j * wid;
+          
+          if (cellData.robotVisited) {
+            p.fill(255, 0, 0, 100);
+            p.noStroke();
+            p.rect(x, y, wid, wid);
+          }
+          
+          p.stroke(0);
+          if (cellData.walls[0]) p.line(x, y, x + wid, y);
+          if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid);
+          if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid);
+          if (cellData.walls[3]) p.line(x, y + wid, x, y);
+          
+          if (cellData.isRobotHere) {
+            p.fill(255, 0, 0);
+            p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
+            
+            let lineEndX = x + wid / 2;
+            let lineEndY = y + wid / 2;
+            const directionLineLength = wid / 4;
+            switch (cellData.robotDirection) {
+              case 'N':
+                lineEndY -= directionLineLength;
+                break;
+              case 'E':
+                lineEndX += directionLineLength;
+                break;
+              case 'S':
+                lineEndY += directionLineLength;
+                break;
+              case 'W':
+                lineEndX -= directionLineLength;
+                break;
             }
-        };
+            p.stroke(255); // White for visibility
+            p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY);
+          }
+        });
+      };
+      
+      p.draw = drawMaze;
     }, mazeContainer);
+  } else {
+    p5Sketch.redraw();
+  }
 }
 
-$: if (showSoftware) {
-  if (p5Sketch) {
-    p5Sketch.remove(); // Remove existing sketch if any
-  }
-  // Delay the sketch initialization to ensure `mazeContainer` is available
-  setTimeout(() => {
+
+
+
+  $: if (serializedMaze && mazeContainer) {
     drawSerializedMaze();
-  }, 0);
-} else {
-  if (p5Sketch) {
-    p5Sketch.remove();
-    p5Sketch = null;
   }
-}
 
 
   // Modified Cell function to accept and draw based on serialized data
 
   onMount(() => {
-    serializedMaze = generateMaze(16, 16); // Generate maze with 16x16 grid
-    console.log(JSON.stringify(serializedMaze, null, 2));
-    //drawSerializedMaze();
+  // Listen for 'update_maze' event from the server
+  socket.on('update_maze', (data) => {
+    console.log('Received updated maze:', data);
+    serializedMaze = data.updatedMaze; // Update your maze data
+    drawSerializedMaze(); // Re-draw the maze with the updated data
   });
 
+  serializedMaze = generateMaze(16, 16); // Initial maze generation, you can remove this if you'll receive the initial state from the server as well
+  drawSerializedMaze(); // You might want to comment this out if you're expecting the initial state from the server
+  });
+  
   onDestroy(() => {
     if (p5Sketch) {
       p5Sketch.remove();
@@ -345,6 +373,33 @@ async function handleFileButtonClick() {
 
 
 
+async function runSimulation() {
+    const algorithmCode = editorText; // Your algorithm code here)
+    const serializedMazeSent = serializedMaze;
+    try {
+        const response = await fetch('http://localhost:5001/run', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                algorithm_code: algorithmCode,
+                serializedMaze: serializedMazeSent,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Simulation result:', data);
+        // Update your front-end accordingly with the received data
+    } catch (error) {
+        console.error('Error running simulation:', error);
+    }
+}
+
 
 </script>
 
@@ -391,7 +446,7 @@ async function handleFileButtonClick() {
           <div class="button-container">
             <button class="thin-button" on:click={promptForFileName}>Save</button>
             <button class="thin-button" on:click={handleFileButtonClick}>File</button>
-            <button class="thin-button" on:click={displaySerializedMaze}>Run</button>
+            <button class="thin-button" on:click={runSimulation}>Run</button>
           </div>
         {/if}
       </div>
