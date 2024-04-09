@@ -16,20 +16,9 @@
   let savedFiles = [];
   var serializedMaze = []; // Use reactive to watch changes
   $: userCurrentEmail = $userEmail; 
-  let initialized = false;
-  let robotRow = 0;
-  let robotCol = 0;
-
   let p5Sketch = null;
-  let robot2Row = 15;
-  let robot2Col = 15;
+  
 
-  // When generating the initial maze or robot positions
-  // Initialize robot positions more flexibly, potentially within a single structure
-  let robotPositions = [
-    { row: 0, col: 0, direction: 'N' },
-    { row: 15, col: 15, direction: 'S' } // Example second robot initialized at the opposite corner
-  ];
 
   async function uploadToBot() {
   // Since you already have userCurrentEmail reactive variable
@@ -98,13 +87,13 @@ function generateMaze(cols, rows) {
                 id: 1,
                 isHere: i === 0 && j === 0,
                 visited: i === 0 && j === 0,
-                direction: (i === 0 && j === 0) ? 'N' : null // Set to null if robot is not here
+                direction: (i === 0 && j === 0) ? 'S' : null // Set to null if robot is not here
               },
               {
                 id: 2,
                 isHere: i === 15 && j === 15,
                 visited: i === 15 && j === 15,
-                direction: (i === 15 && j === 15) ? 'S' : null // Set to null if robot is not here
+                direction: (i === 15 && j === 15) ? 'N' : null // Set to null if robot is not here
               }
             ];
             grid.push(cell);
@@ -289,14 +278,6 @@ function drawSerializedMaze() {
 }
 
 
-
-
-
-
-
-
-
-
   $: if (serializedMaze && mazeContainer) {
     drawSerializedMaze();
   }
@@ -470,7 +451,7 @@ async function handleFileButtonClick() {
 
 
 <Navi/>
-<div class="button-container">
+<div class="loggin">
   Logged in as: {$userEmail}
 </div>
 
@@ -538,7 +519,7 @@ async function handleFileButtonClick() {
 
 
 <div class="content has-text-centered">
-  <p style="color: white">
+  <p style="color: white; padding: 50px;">
     UGA Maze Competition Official Site
   </p>
 </div>
@@ -550,6 +531,14 @@ async function handleFileButtonClick() {
     margin: 0 2rem;
   }
 
+  .loggin {
+    display: flex;
+    width: calc(100% - 4rem); /* Subtract 2rem on both sides for left and right margins */
+    margin: 0 2rem;
+    background-color: #B71234;
+    border: #000 1px solid;
+  }
+
   .thin-button-top {
     flex: 1; /* Make each button take up equal width */
     margin: 0; /* Remove default margin */
@@ -558,6 +547,7 @@ async function handleFileButtonClick() {
     background-color: #B71234; /* Set background color */
     color: #fff; /* Set text color */
     cursor: pointer;
+    border: #000 1px solid;
   }
 
   .button-container {
@@ -580,6 +570,7 @@ async function handleFileButtonClick() {
     background-color: lightgray;
     width: calc(100% - 4rem); /* Subtract 2rem on both sides for left and right margins */
     margin: 0 2rem;
+    border: #000 1px solid;
   }
 
   .content {
@@ -687,16 +678,13 @@ async function handleFileButtonClick() {
   margin: 0; /* Remove default margin */
   padding: 10px 20px; /* Adjust padding to make the button more prominent */
   border: none; /* Remove border */
-  background-color: #4CAF50; /* A distinct, eye-catching color */
+  background-color: #B71234;  /* A distinct, eye-catching color */
   color: white; /* Set text color to white for contrast */
   cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
-  transition: background-color 0.3s, box-shadow 0.2s, transform 0.1s; /* Smooth transitions for interactive effects */
-  border-radius: 5px; /* Rounded corners for a modern look */
 }
 
 .thin-button-left:hover {
-  background-color: #45a049; /* Darken the button color slightly on hover */
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19); /* Add shadow for depth */
+  background-color:gray; /* Darken the button color slightly on hover */
 }
 
 .thin-button-left:active {
