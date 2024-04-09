@@ -186,69 +186,74 @@ function removeWalls(a, b) {
   
 
 function drawSerializedMaze() {
-  if (!p5Sketch) {
-    p5Sketch = new p5((p) => {
-      const wid = 30; // Width and height of each cell
-      const cols = 16; // Number of columns
-      const rows = 16; // Number of rows
-      
-      p.setup = () => {
-        p.createCanvas(cols * wid, rows * wid);
-        p.noLoop();
-      };
-      
-      const drawMaze = () => {
-        p.background(255);
-        
-        serializedMaze.forEach(cellData => {
-          const x = cellData.i * wid;
-          const y = cellData.j * wid;
-          
-          if (cellData.robotVisited) {
-            p.fill(255, 0, 0, 100);
-            p.noStroke();
-            p.rect(x, y, wid, wid);
-          }
-          
-          p.stroke(0);
-          if (cellData.walls[0]) p.line(x, y, x + wid, y);
-          if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid);
-          if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid);
-          if (cellData.walls[3]) p.line(x, y + wid, x, y);
-          
-          if (cellData.isRobotHere) {
-            p.fill(255, 0, 0);
-            p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
-            
-            let lineEndX = x + wid / 2;
-            let lineEndY = y + wid / 2;
-            const directionLineLength = wid / 4;
-            switch (cellData.robotDirection) {
-              case 'N':
-                lineEndY -= directionLineLength;
-                break;
-              case 'E':
-                lineEndX += directionLineLength;
-                break;
-              case 'S':
-                lineEndY += directionLineLength;
-                break;
-              case 'W':
-                lineEndX -= directionLineLength;
-                break;
-            }
-            p.stroke(255); // White for visibility
-            p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY);
-          }
-        });
-      };
-      
-      p.draw = drawMaze;
-    }, mazeContainer);
-  } else {
-    p5Sketch.redraw();
+  // If there is already a sketch, remove it to ensure we're starting fresh.
+  // This is important to avoid issues when re-drawing the maze after toggling sections.
+  if (p5Sketch) {
+    p5Sketch.remove();
+    p5Sketch = null;
   }
+  
+  p5Sketch = new p5((p) => {
+    const wid = 30; // Width and height of each cell
+    const cols = 16; // Number of columns
+    const rows = 16; // Number of rows
+    
+    p.setup = () => {
+      p.createCanvas(cols * wid, rows * wid);
+      p.noLoop(); // Ensures that the draw function is called only once
+    };
+    
+    p.draw = () => {
+      p.background(255);
+      
+      serializedMaze.forEach(cellData => {
+        const x = cellData.i * wid;
+        const y = cellData.j * wid;
+        
+        if (cellData.robotVisited) {
+          p.fill(255, 0, 0, 100); // Marks the visited cells with a lighter red
+          p.noStroke(); // Removes the stroke for these cells for a solid fill
+          p.rect(x, y, wid, wid); // Draws the rectangle for visited cells
+        }
+        
+        // Draws the walls of the cell
+        p.stroke(0); // Sets the stroke color to black for the walls
+        if (cellData.walls[0]) p.line(x, y, x + wid, y); // Top wall
+        if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid); // Right wall
+        if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid); // Bottom wall
+        if (cellData.walls[3]) p.line(x, y + wid, x, y); // Left wall
+        
+        // Marks the current position of the robot
+        if (cellData.isRobotHere) {
+          p.fill(255, 0, 0); // Fills the robot's cell with red
+          p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2); // Draws the robot as a circle in the cell
+          
+          // Determines the end point of the line indicating the robot's direction
+          let lineEndX = x + wid / 2;
+          let lineEndY = y + wid / 2;
+          const directionLineLength = wid / 4; // Sets the length of the direction line
+          switch (cellData.robotDirection) {
+            case 'N':
+              lineEndY -= directionLineLength;
+              break;
+            case 'E':
+              lineEndX += directionLineLength;
+              break;
+            case 'S':
+              lineEndY += directionLineLength;
+              break;
+            case 'W':
+              lineEndX -= directionLineLength;
+              break;
+          }
+          p.stroke(255); // Sets the stroke color to white for visibility against the red fill
+          p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY); // Draws the direction line
+        }
+      });
+    };
+  }, mazeContainer);
 }
+
 
 
 
@@ -256,6 +261,7 @@ function drawSerializedMaze() {
   $: if (serializedMaze && mazeContainer) {
     drawSerializedMaze();
   }
+  
 
 
   // Modified Cell function to accept and draw based on serialized data
@@ -323,6 +329,9 @@ function drawSerializedMaze() {
 
   function toggleSection() {
     showSoftware = !showSoftware;
+    if (showSoftware) {
+      drawSerializedMaze();
+    }
   }
 
 
@@ -455,20 +464,24 @@ async function runSimulation() {
 {/if}
 
 {#if !showSoftware}
-  <div class="is-flex is-justify-content-center is-align-items-center is-square" id="hardware-section">
-    <section class="section hardware-section">
-      <div style="background: darkgray;"class="has-text-centered">
-        <h1 class="title is-1">Hardware Section</h1>
-        <!-- Add  hardware-related content here when the time comes  -->
-      </div>
-    </section>
-  </div>
-  <div class="button-container">
-    <button class="thin-button">File</button>
-    <button class="thin-button">Save</button>
-    <button class="thin-button-left" on:click={uploadToBot}>Upload to bot</button>
+  <div class="hardware-section">
+    <div class="title-container">
+      <h1 class="title is-1">Hardware Section</h1>
+    </div>
+    <div class="camera-feed">
+      <img src="http://192.168.1.78:8000/" alt="Live Camera Feed" />
+    </div>
+    <!-- Camera feed integration ends here -->
+    
+    <!-- Buttons -->
+    <div class="button-container">
+      <button class="thin-button" on:click={promptForFileName}>Save</button>
+      <button class="thin-button" on:click={handleFileButtonClick}>File</button>
+      <button class="thin-button-left" on:click={uploadToBot}>Upload to bot</button>
+    </div>
   </div>
 {/if}
+
 
 <div class="content has-text-centered">
   <p style="color: white">
@@ -635,6 +648,32 @@ async function runSimulation() {
 .thin-button-left:active {
   transform: translateY(2px); /* Slight push effect when clicked */
 }
+
+.camera-feed {
+  display: flex;
+  justify-content: center; /* Keeps the content centered */
+  align-items: center; /* Aligns items vertically */
+  background-color: #000; /* Black background */
+  padding: 20px; /* Padding around the video feed */
+  margin: 20px auto; /* Centers the container and adds margin around it */
+  border: 3px solid #ddd; /* Optional border for the camera feed container */
+  max-width: 820px; /* Adjust this value based on the camera feed size */
+}
+
+.camera-feed img {
+  width: 100%; /* Makes the image fill the container */
+  height: auto; /* Maintains the aspect ratio */
+}
+.title-container {
+  text-align: center; /* Centers the title text */
+  width: 100%; /* Ensure the container spans the full width */
+}
+  .title.is-1 {
+  color: #ffffff; /* Sets the title color to white */
+}
+
+
+
 
 /* Animation for dropdown appearance */
 @keyframes fadeIn {
