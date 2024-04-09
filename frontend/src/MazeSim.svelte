@@ -21,6 +21,15 @@
   let robotCol = 0;
 
   let p5Sketch = null;
+  let robot2Row = 15;
+  let robot2Col = 15;
+
+  // When generating the initial maze or robot positions
+  // Initialize robot positions more flexibly, potentially within a single structure
+  let robotPositions = [
+    { row: 0, col: 0, direction: 'N' },
+    { row: 15, col: 15, direction: 'S' } // Example second robot initialized at the opposite corner
+  ];
 
   async function uploadToBot() {
   // Since you already have userCurrentEmail reactive variable
@@ -75,18 +84,29 @@
 }
 
 
-  function generateMaze(cols, rows) {
+function generateMaze(cols, rows) {
     let grid = [];
     let stack = [];
 
-    // Initialize all cells
+    // Initialize all cells with the new robots structure
     for (let j = 0; j < rows; j++) {
         for (let i = 0; i < cols; i++) {
             let cell = new Cell(i, j, cols, rows, grid);
-            // Check if the cell is the initial robot position
-            cell.isRobotHere = i === robotRow && j === robotCol;
-            cell.robotVisited = cell.isRobotHere; // Assume robot starts here and marks it as visited
-            cell.robotDirection = cell.isRobotHere ? 'N' : null; // Robot faces North initially
+            // Modify cell initialization to include robots data with conditional direction
+            cell.robots = [
+              {
+                id: 1,
+                isHere: i === 0 && j === 0,
+                visited: i === 0 && j === 0,
+                direction: (i === 0 && j === 0) ? 'N' : null // Set to null if robot is not here
+              },
+              {
+                id: 2,
+                isHere: i === 15 && j === 15,
+                visited: i === 15 && j === 15,
+                direction: (i === 15 && j === 15) ? 'S' : null // Set to null if robot is not here
+              }
+            ];
             grid.push(cell);
         }
     }
@@ -98,27 +118,27 @@
         let next = current.checkNeighbors();
         if (next) {
             next.visited = true;
-            // Push the current cell to the stack
-            stack.push(current);
-            // Remove the walls between the current cell and the next cell
-            removeWalls(current, next);
-            // Move to the next cell
-            current = next;
+            stack.push(current); // Push the current cell to the stack
+            removeWalls(current, next); // Remove the walls between the current cell and the next cell
+            current = next; // Move to the next cell
         } else if (stack.length > 0) {
-            current = stack.pop();
+            current = stack.pop(); // Backtrack if there are no unvisited neighbors
         }
     } while (stack.length > 0);
 
-    // Serialize the maze with updated properties
+    // Serialize the maze with updated properties, including the conditional robots' direction data
     return grid.map(cell => ({
         i: cell.i,
         j: cell.j,
         walls: cell.walls,
-        isRobotHere: cell.isRobotHere,
-        robotVisited: cell.robotVisited,
-        robotDirection: cell.robotDirection // Include the robot's direction
+        robots: cell.robots.map(robot => ({
+          ...robot,
+          direction: robot.isHere ? robot.direction : null // Ensure direction is null if robot is not here
+        })) // Map each robot to include conditional direction
     }));
 }
+
+
 
 
 class Cell {
@@ -186,73 +206,92 @@ function removeWalls(a, b) {
   
 
 function drawSerializedMaze() {
-  // If there is already a sketch, remove it to ensure we're starting fresh.
-  // This is important to avoid issues when re-drawing the maze after toggling sections.
   if (p5Sketch) {
     p5Sketch.remove();
     p5Sketch = null;
   }
-  
+
   p5Sketch = new p5((p) => {
     const wid = 30; // Width and height of each cell
     const cols = 16; // Number of columns
     const rows = 16; // Number of rows
-    
+
     p.setup = () => {
       p.createCanvas(cols * wid, rows * wid);
       p.noLoop(); // Ensures that the draw function is called only once
     };
-    
+
     p.draw = () => {
       p.background(255);
-      
+
+      // First, draw the visited shading for each cell
       serializedMaze.forEach(cellData => {
         const x = cellData.i * wid;
         const y = cellData.j * wid;
-        
-        if (cellData.robotVisited) {
-          p.fill(255, 0, 0, 100); // Marks the visited cells with a lighter red
-          p.noStroke(); // Removes the stroke for these cells for a solid fill
-          p.rect(x, y, wid, wid); // Draws the rectangle for visited cells
-        }
-        
-        // Draws the walls of the cell
-        p.stroke(0); // Sets the stroke color to black for the walls
-        if (cellData.walls[0]) p.line(x, y, x + wid, y); // Top wall
-        if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid); // Right wall
-        if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid); // Bottom wall
-        if (cellData.walls[3]) p.line(x, y + wid, x, y); // Left wall
-        
-        // Marks the current position of the robot
-        if (cellData.isRobotHere) {
-          p.fill(255, 0, 0); // Fills the robot's cell with red
-          p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2); // Draws the robot as a circle in the cell
-          
-          // Determines the end point of the line indicating the robot's direction
-          let lineEndX = x + wid / 2;
-          let lineEndY = y + wid / 2;
-          const directionLineLength = wid / 4; // Sets the length of the direction line
-          switch (cellData.robotDirection) {
-            case 'N':
-              lineEndY -= directionLineLength;
-              break;
-            case 'E':
-              lineEndX += directionLineLength;
-              break;
-            case 'S':
-              lineEndY += directionLineLength;
-              break;
-            case 'W':
-              lineEndX -= directionLineLength;
-              break;
+
+        cellData.robots.forEach(robot => {
+          // Apply shading only if the robot has visited, excluding the current position
+          if (robot.visited) {
+            const fillColor = robot.id === 1 ? 'rgba(255, 102, 102, 100)' : 'rgba(153, 153, 255, 100)';
+            p.fill(fillColor);
+            p.noStroke();
+            p.rect(x, y, wid, wid);
           }
-          p.stroke(255); // Sets the stroke color to white for visibility against the red fill
-          p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY); // Draws the direction line
-        }
+        });
+      });
+
+      // Then, draw walls and robots to ensure they are not covered by the shading
+      serializedMaze.forEach(cellData => {
+        const x = cellData.i * wid;
+        const y = cellData.j * wid;
+
+        // Draws the walls of the cell
+        p.stroke(0);
+        if (cellData.walls[0]) p.line(x, y, x + wid, y);
+        if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid);
+        if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid);
+        if (cellData.walls[3]) p.line(x, y + wid, x, y);
+
+        // Draw each robot in its current cell
+        cellData.robots.forEach(robot => {
+          if (robot.isHere) {
+            const fillColor = robot.id === 1 ? 'rgba(255, 0, 0, 255)' : 'rgba(0, 0, 255, 255)';
+            p.fill(fillColor);
+            p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
+
+            // Optional: Direction line for the robot
+            let lineEndX = x + wid / 2;
+            let lineEndY = y + wid / 2;
+            const directionLineLength = wid / 4;
+            if (robot.direction) {
+              switch (robot.direction) {
+                case 'N':
+                  lineEndY -= directionLineLength;
+                  break;
+                case 'E':
+                  lineEndX += directionLineLength;
+                  break;
+                case 'S':
+                  lineEndY += directionLineLength;
+                  break;
+                case 'W':
+                  lineEndX -= directionLineLength;
+                  break;
+              }
+              p.stroke(255); // White for visibility
+              p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY);
+            }
+          }
+        });
       });
     };
   }, mazeContainer);
 }
+
+
+
+
+
 
 
 
@@ -382,32 +421,47 @@ async function handleFileButtonClick() {
 
 
 
-async function runSimulation() {
-    const algorithmCode = editorText; // Your algorithm code here)
-    const serializedMazeSent = serializedMaze;
+  async function runSimulation() {
+      const algorithmCode = editorText; // Your algorithm code here)
+      const serializedMazeSent = serializedMaze;
+      try {
+          const response = await fetch('http://localhost:5001/run', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  algorithm_code: algorithmCode,
+                  serializedMaze: serializedMazeSent,
+              }),
+          });
+
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('Simulation result:', data);
+          // Update your front-end accordingly with the received data
+      } catch (error) {
+          console.error('Error running simulation:', error);
+      }
+  }
+
+  async function handleRunButtonClick() {
     try {
-        const response = await fetch('http://localhost:5001/run', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                algorithm_code: algorithmCode,
-                serializedMaze: serializedMazeSent,
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Simulation result:', data);
-        // Update your front-end accordingly with the received data
+      // Serialize the maze data to a JSON string
+      const serializedData = JSON.stringify(serializedMaze, null, 2);
+      // Copy the serialized data to the clipboard
+      await navigator.clipboard.writeText(serializedData);
+      // Alert the user that the data has been copied
+      alert('Serialized maze data has been copied to clipboard.');
     } catch (error) {
-        console.error('Error running simulation:', error);
+      console.error('Error copying serialized maze data to clipboard:', error);
+      // Alert the user in case of an error
+      alert('Failed to copy serialized maze data to clipboard.');
     }
-}
+  }
 
 
 </script>
@@ -455,7 +509,8 @@ async function runSimulation() {
           <div class="button-container">
             <button class="thin-button" on:click={promptForFileName}>Save</button>
             <button class="thin-button" on:click={handleFileButtonClick}>File</button>
-            <button class="thin-button" on:click={runSimulation}>Run</button>
+            <!-- <button class="thin-button" on:click={runSimulation}>Run</button> -->
+            <button class="thin-button" on:click={handleRunButtonClick}>Run</button>
           </div>
         {/if}
       </div>
