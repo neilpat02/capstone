@@ -470,7 +470,7 @@ async function handleFileButtonClick() {
 
 
 <Navi/>
-<div class="logged-in-as">
+<div class="button-container">
   Logged in as: {$userEmail}
 </div>
 
@@ -482,7 +482,7 @@ async function handleFileButtonClick() {
 {#if showSoftware}
   <div class="is-flex is-flex-direction-column is-justify-content-center is-align-items-center is-square" id="software-section">
     <div class="has-text-centered">
-      <h1 class="title is-1">Maze Simulator</h1>
+      <h1 class="title is-1"style="padding:20px">Maze Simulator</h1>
     </div>
     <div class="is-flex is-justify-content-space-between" style="flex: 1; width: 100%;">
       <div style="flex: 1;">
@@ -577,7 +577,7 @@ async function handleFileButtonClick() {
 
   /* Styles for the overall layout */
   .is-square {
-    height: 70vh; /* Adjusted for larger size */
+    height: 100vh; /* Adjusted for larger size */
     background-color: lightgray;
     width: calc(100% - 4rem); /* Subtract 2rem on both sides for left and right margins */
     margin: 0 2rem;
