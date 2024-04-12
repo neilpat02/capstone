@@ -490,7 +490,8 @@ async function handleFileButtonClick() {
           <div class="button-container">
             <button class="thin-button" on:click={promptForFileName}>Save</button>
             <button class="thin-button" on:click={handleFileButtonClick}>File</button>
-            <button class="thin-button" on:click={runSimulation}>Run</button> 
+            <button class="thin-button" on:click={runSimulation}>Run</button>
+            <!-- <button class="thin-button" on:click={handleRunButtonClick}>Run</button> -->
           </div>
         {/if}
       </div>
