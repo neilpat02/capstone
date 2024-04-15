@@ -395,10 +395,10 @@ function drawSerializedMaze() {
     }
 }
 
-async function handleFileButtonClick() {
-  await fetchSavedFiles();
-  toggleDropdownAnimation();
-}
+  async function handleFileButtonClick() {
+    await fetchSavedFiles();
+    toggleDropdownAnimation();
+  }
 
 
 
@@ -443,6 +443,35 @@ async function handleFileButtonClick() {
       alert('Failed to copy serialized maze data to clipboard.');
     }
   }
+
+  async function stopSimulation() {
+    try {
+        const response = await fetch('http://localhost:5001/reset', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Reset response:', data.message);
+        alert(data.message); // Optionally alert the user about the reset.
+    } catch (error) {
+        console.error('Error resetting simulation:', error);
+        alert('Failed to reset simulation.');
+    }
+  }
+
+  async function resetSimulation() {
+    // After resetting the simulation, generate a new random maze
+    serializedMaze = generateMaze(16, 16); // Adjust dimensions as needed
+    drawSerializedMaze(); // Redraw the maze with new data
+  }
+
 
 
 </script>
@@ -491,6 +520,10 @@ async function handleFileButtonClick() {
             <button class="thin-button" on:click={promptForFileName}>Save</button>
             <button class="thin-button" on:click={handleFileButtonClick}>File</button>
             <button class="thin-button" on:click={runSimulation}>Run</button>
+            <button class="thin-button" on:click={stopSimulation}>Stop</button>
+            <button class="thin-button" on:click={resetSimulation}>Reset</button>
+
+
             <!-- <button class="thin-button" on:click={handleRunButtonClick}>Run</button> -->
           </div>
         {/if}
