@@ -2,16 +2,16 @@
   import { createEventDispatcher } from 'svelte';
   import Footer from "./widget/Footer.svelte";
   import Navi from "./widget/Navi.svelte";
-  import { userEmail} from './userStore.js';
+  import { userEmail, userToken, setToken } from './userStore.js'; // Import userToken and setToken function
 
   const dispatch = createEventDispatcher();
   let email = '';
   let password = '';
   let loginMessage = '';
 
-  async function handleSubmit() { //function to handle the submission of the login info. 
+  async function handleSubmit() {
     try {
-      const response = await fetch('http://localhost:3000/api/login', { //fetches the data from the server
+      const response = await fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -21,27 +21,25 @@
 
       const result = await response.json();
 
-      if (response.ok) { //if the result is found in the DB, then the login is successful
-        loginMessage = "Login successful";
-        dispatch('login'); // Dispatch event for successful login
+      if (response.ok) {
+        setToken(result.token); // Save the token using the setToken function
         userEmail.set(email); // Store the email in the Svelte store
+        dispatch('login'); // Dispatch event for successful login
         alert(`Logged in as: ${email}`); // Alert the email to the user
+        loginMessage = "Login successful";
       } else {
         loginMessage = `Error: ${result.message}`;
         alert(`Error: ${result.message}`);
       }
-    } catch (error) { //if not, alert user and try again!
+    } catch (error) {
       loginMessage = `Error: ${error.message}`;
       alert(`Error Occurred: ${error.message}`);
     }
-}
+  }
 
-  
-  
-
-  const handleForgotPassword = async () => { //function to handle forgot password.  
-  try { 
-      const response = await fetch('http://localhost:3000/api/forgot-password', { //awaits a response to check if the user email is found
+  const handleForgotPassword = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +49,7 @@
 
       const result = await response.json();
 
-      if (response.ok) { //if the response is found, then the email is going to be sent 
+      if (response.ok) {
         loginMessage = "Email sent";
         alert("Email sent");
       } else {
@@ -62,7 +60,6 @@
       loginMessage = `Error: ${error.message}`;
       alert(`Error Occurred: ${error.message}`);
     }
-      
   };
 </script>
 
@@ -79,8 +76,6 @@
 
 <div class="container p-5">
   <div class="content">
-
-      <!-- Login form from the old LoginPage -->
       <div class="login-container">
         <h3 style="color: gray">Login</h3>
           <form on:submit|preventDefault={handleSubmit}>
@@ -141,24 +136,6 @@
 
     .login-btn:hover {
         background-color: #BA0C2F;
-    }
-
-    .google-btn {
-        margin-top: 20px;
-        padding: 10px;
-        width: 100%;
-        border: 2px solid #BA0C2F;
-        background-color: #fff;
-        color: #BA0C2F;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 18px;
-        text-align: center;
-    }
-
-    .google-btn:hover {
-        background-color: #BA0C2F;
-        color: #fff;
     }
 
     .forgot-password-btn {

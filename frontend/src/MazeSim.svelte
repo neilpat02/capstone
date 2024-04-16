@@ -2,7 +2,7 @@
   import Navi from "./widget/Navi.svelte";
   import Footer from "./widget/Footer.svelte";
   import AceEditor from "./widget/ace_builds.svelte";
-  import { userEmail } from './userStore.js';
+  import { userEmail, userToken } from './userStore.js';
   import { onDestroy, onMount } from 'svelte';
   import p5 from 'p5'; //p5 library for the graphical representation of the maze
   import io from 'socket.io-client'; 
@@ -316,10 +316,11 @@ function drawSerializedMaze() {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/save-text', { // await the a response (button press) from the user 
+      const response = await fetch('http://localhost:3000/api/save-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${$userToken}` // Include the JWT in requests
         },
         body: JSON.stringify({
           userEmail: userCurrentEmail,
@@ -328,7 +329,7 @@ function drawSerializedMaze() {
         }),
       });
 
-      if (response.ok) { //text is saved successfully
+      if (response.ok) {
         alert('Text saved successfully!');
         fileName = "";
         isSaving = false;
@@ -358,10 +359,11 @@ function drawSerializedMaze() {
 
   async function fetchSavedFiles() {
     const response = await fetch(`http://localhost:3000/api/get-texts?userEmail=${$userEmail}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${$userToken}` // Include the JWT in requests
+      },
     });
 
     if (response.ok) {

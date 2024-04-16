@@ -1,9 +1,8 @@
-
 <script>
 	import Footer from "./widget/Footer.svelte";
 	import Navi from "./widget/Navi.svelte";
     import { createEventDispatcher } from 'svelte';
-    import { team} from './userStore.js';
+    import { userEmail, userToken, setToken } from './userStore.js'; // Include setToken and userToken
     let teamName = '';
     let email = '';
     let password = '';
@@ -22,18 +21,17 @@
             const result = await response.json();
 
             if (response.ok) {
-                alert("Sign Up Successful!")
-                dispatch('login');
+                setToken(result.token); // Store the token from the server
+                userEmail.set(email); // Update the user email in the store
+                alert("Sign Up Successful!");
+                dispatch('login'); // Dispatch login event
             } else {
-                alert("Error: ${result.message}")
+                alert(`Error: ${result.message}`);
             }
         } catch (error) {
-            alert("Error Occured: ${error.message}")
+            alert(`Error Occurred: ${error.message}`);
         }
     }
-
-
-
 </script>
 
 <section class="hero is-small has-text-centered">
@@ -54,13 +52,12 @@
         <input type="password" bind:value={password} class="form-control" placeholder="Password" required>
         <button type="submit" class="signup-btn">Sign Up</button>
     </form>
-    
 </div>
 <div style="padding: 20px" class="has-text-centered">
     <p style="color: white">
-      UGA Maze Competition Offical Site 
+      UGA Maze Competition Official Site 
     </p>
-  </div>
+</div>
 
 <style>
     .signup-container {
@@ -120,5 +117,4 @@
         background-color: #BA0C2F;
         color: #fff;
     }
-
 </style>
