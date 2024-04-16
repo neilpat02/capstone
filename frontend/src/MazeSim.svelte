@@ -75,57 +75,62 @@
 
 function generateMaze(cols, rows) {
     let grid = [];
-    let stack = [];
+    let robotPositions = [];
 
-    // Initialize all cells with the new robots structure
+    // Randomly assign initial positions to each robot
+    while (robotPositions.length < 4) {
+        let i = Math.floor(Math.random() * cols);
+        let j = Math.floor(Math.random() * rows);
+        let posKey = `${i}-${j}`;
+
+        if (!robotPositions.includes(posKey)) {
+            robotPositions.push(posKey);
+        }
+    }
+
     for (let j = 0; j < rows; j++) {
         for (let i = 0; i < cols; i++) {
             let cell = new Cell(i, j, cols, rows, grid);
-            // Modify cell initialization to include robots data with conditional direction
+            // Initialize robots based on the randomized positions
             cell.robots = [
-              {
-                id: 1,
-                isHere: i === 0 && j === 0,
-                visited: i === 0 && j === 0,
-                direction: (i === 0 && j === 0) ? 'S' : null // Set to null if robot is not here
-              },
-              {
-                id: 2,
-                isHere: i === 15 && j === 15,
-                visited: i === 15 && j === 15,
-                direction: (i === 15 && j === 15) ? 'N' : null // Set to null if robot is not here
-              }
+                { id: 1, isHere: robotPositions[0] === `${i}-${j}`, visited: robotPositions[0] === `${i}-${j}`, direction: null },
+                { id: 2, isHere: robotPositions[1] === `${i}-${j}`, visited: robotPositions[1] === `${i}-${j}`, direction: null },
+                { id: 3, isHere: robotPositions[2] === `${i}-${j}`, visited: robotPositions[2] === `${i}-${j}`, direction: null },
+                { id: 4, isHere: robotPositions[3] === `${i}-${j}`, visited: robotPositions[3] === `${i}-${j}`, direction: null }
             ];
             grid.push(cell);
         }
     }
 
-    let current = grid[0]; // Start the maze generation from the first cell
+    let current = grid[0]; // Start maze generation from the first cell
     current.visited = true;
 
+    let stack = [];
     do {
         let next = current.checkNeighbors();
         if (next) {
             next.visited = true;
-            stack.push(current); // Push the current cell to the stack
-            removeWalls(current, next); // Remove the walls between the current cell and the next cell
-            current = next; // Move to the next cell
+            stack.push(current);
+            removeWalls(current, next);
+            current = next;
         } else if (stack.length > 0) {
-            current = stack.pop(); // Backtrack if there are no unvisited neighbors
+            current = stack.pop();
         }
     } while (stack.length > 0);
 
-    // Serialize the maze with updated properties, including the conditional robots' direction data
     return grid.map(cell => ({
         i: cell.i,
         j: cell.j,
         walls: cell.walls,
         robots: cell.robots.map(robot => ({
-          ...robot,
-          direction: robot.isHere ? robot.direction : null // Ensure direction is null if robot is not here
-        })) // Map each robot to include conditional direction
+            ...robot,
+            direction: robot.isHere ? (robot.id === 1 ? 'S' : robot.id === 2 ? 'N' : robot.id === 3 ? 'E' : 'W') : null
+        }))
     }));
 }
+
+
+
 
 
 
@@ -221,7 +226,13 @@ function drawSerializedMaze() {
         cellData.robots.forEach(robot => {
           // Apply shading only if the robot has visited, excluding the current position
           if (robot.visited) {
-            const fillColor = robot.id === 1 ? 'rgba(255, 102, 102, 100)' : 'rgba(153, 153, 255, 100)';
+            let fillColor = 'rgba(200, 200, 200, 100)'; // Default gray shade
+            switch(robot.id) {
+              case 1: fillColor = 'rgba(255, 102, 102, 100)'; break; // Light red
+              case 2: fillColor = 'rgba(102, 204, 255, 100)'; break; // Light blue
+              case 3: fillColor = 'rgba(153, 255, 153, 100)'; break; // Light green
+              case 4: fillColor = 'rgba(171, 141, 237, 100)'; break; // Light Purple
+            }
             p.fill(fillColor);
             p.noStroke();
             p.rect(x, y, wid, wid);
@@ -244,7 +255,13 @@ function drawSerializedMaze() {
         // Draw each robot in its current cell
         cellData.robots.forEach(robot => {
           if (robot.isHere) {
-            const fillColor = robot.id === 1 ? 'rgba(255, 0, 0, 255)' : 'rgba(0, 0, 255, 255)';
+            let fillColor = 'rgba(200, 200, 200, 255)'; // Default gray
+            switch(robot.id) {
+              case 1: fillColor = 'rgba(200, 100, 0, 255)'; break; // Red
+              case 2: fillColor = 'rgba(0, 100, 200, 255)'; break; // Blue
+              case 3: fillColor = 'rgba(100, 200, 0, 255)'; break; // Green
+              case 4: fillColor = 'rgba(108, 0, 255, 255)'; break; // Purple
+            }
             p.fill(fillColor);
             p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
 
@@ -254,18 +271,10 @@ function drawSerializedMaze() {
             const directionLineLength = wid / 4;
             if (robot.direction) {
               switch (robot.direction) {
-                case 'N':
-                  lineEndY -= directionLineLength;
-                  break;
-                case 'E':
-                  lineEndX += directionLineLength;
-                  break;
-                case 'S':
-                  lineEndY += directionLineLength;
-                  break;
-                case 'W':
-                  lineEndX -= directionLineLength;
-                  break;
+                case 'N': lineEndY -= directionLineLength; break;
+                case 'E': lineEndX += directionLineLength; break;
+                case 'S': lineEndY += directionLineLength; break;
+                case 'W': lineEndX -= directionLineLength; break;
               }
               p.stroke(255); // White for visibility
               p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY);
@@ -276,6 +285,7 @@ function drawSerializedMaze() {
     };
   }, mazeContainer);
 }
+
 
 
   $: if (serializedMaze && mazeContainer) {
@@ -344,7 +354,7 @@ function drawSerializedMaze() {
   }
 
   function displaySerializedMaze() {
-    console.log(JSON.stringify(serializedMaze, null, 2));
+    navigator.clipboard.writeText(JSON.stringify(serializedMaze, null, 2));
     alert(JSON.stringify(serializedMaze));
   }
 
