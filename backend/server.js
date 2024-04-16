@@ -5,6 +5,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('./User'); // path to the user schema
 const nodemailer = require('nodemailer'); 
 const SavedText = require('./SavedTexts'); // path to the savedText schema
@@ -30,20 +31,19 @@ app.get('/', (req, res) => {
 // signup route
 app.post('/api/signup', async (req, res) => {
   try {
-      const hashedPassword = await bcrypt.hash(req.body.password, saltRounds); //hasing the passowrd the user enters
-      const existingUser = await User.findOne({ email: req.body.email }); // check if the user already exists based on the email
+      const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+      const existingUser = await User.findOne({ email: req.body.email });
       if (existingUser) {
           return res.status(409).json({ message: "Email already exists" });
       }
-      const user = new User({ //create a new user with the necessary details
+      const user = new User({
           teamName: req.body.teamName,
           email: req.body.email,
           password: hashedPassword,
       });
-
-      const savedUser = await user.save(); //the user is saved to the DB 
-
-      res.status(201).json({ user: { ...savedUser._doc, password: undefined } });
+      const savedUser = await user.save();
+      const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET, { expiresIn: '24h' }); // Sign JWT here
+      res.status(201).json({ user: { ...savedUser._doc, password: undefined }, token });
   } catch (error) {
       res.status(500).json({ message: error.message });
   }
@@ -51,23 +51,34 @@ app.post('/api/signup', async (req, res) => {
 
 // Define the login route
 app.post('/api/login', async (req, res) => {
-    try {
-      // Find the user by email
-      const user = await User.findOne({ email: req.body.email });
-  
-      // If user is found, compare the submitted password with the stored hashed password
-      if (user && await bcrypt.compare(req.body.password, user.password)) {
-        // Passwords match, handle login success
-        res.status(200).json({ message: "Login successful!" });
-      } else {
-        // Passwords do not match or user does not exist, handle login failure
-        res.status(401).json({ message: "Invalid credentials!" });
-      }
-    } catch (error) {
-      // Handle errors
-      res.status(500).json({ message: error.message });
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (user && await bcrypt.compare(req.body.password, user.password)) {
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' }); // Sign JWT here
+      res.status(200).json({ message: "Login successful!", token });
+    } else {
+      res.status(401).json({ message: "Invalid credentials!" });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  if (token == null) return res.sendStatus(401); // if there isn't any token
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403); // token is no longer valid
+    req.user = user;
+    next();
   });
+}
+
+app.get('/api/protected', authenticateToken, (req, res) => {
+  res.status(200).json({ message: 'Welcome to the protected route!' });
+});
 
   app.post('/api/save-text', async (req, res) => {
     const { userEmail, fileName, content } = req.body;
