@@ -229,6 +229,31 @@ app.get('/api/protected', authenticateToken, (req, res) => {
       res.status(500).json({ message: 'Failed to update upload to bot timestamp.' });
     }
   });
+
+
+
+// Route to update software score
+app.patch('/api/update-software-score', async (req, res) => {
+  const { userEmail, newScore } = req.body;
+
+  try {
+    const user = await User.findOneAndUpdate({ email: userEmail }, {
+      $set: { softwareScore: newScore }
+    }, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'Software score updated successfully', softwareScore: user.softwareScore });
+  } catch (error) {
+    console.error('Error updating software score:', error);
+    res.status(500).json({ message: 'Failed to update software score' });
+  }
+});
+
+
+
   
   
 

@@ -17,6 +17,7 @@
   var serializedMaze = []; // Use reactive to watch changes
   $: userCurrentEmail = $userEmail; 
   let p5Sketch = null;
+  let score = 0; // Initialize score
   
 
 
@@ -304,14 +305,23 @@ function drawSerializedMaze() {
     drawSerializedMaze(); // Re-draw the maze with the updated data
   });
 
-  serializedMaze = generateMaze(16, 16); // Initial maze generation, you can remove this if you'll receive the initial state from the server as well
-  drawSerializedMaze(); // You might want to comment this out if you're expecting the initial state from the server
+  // Listen for 'update_score' event from the server to update the score
+  socket.on('update_score', (data) => {
+    score = data.score; // Update the score from the server
+    console.log('Score updated:', score); // Optionally log the updated score
+  });
+
+  // Initial maze generation and display
+  serializedMaze = generateMaze(16, 16);
+  drawSerializedMaze();
   });
   
   onDestroy(() => {
-    if (p5Sketch) {
-      p5Sketch.remove();
-    }
+  if (p5Sketch) {
+    p5Sketch.remove();
+  }
+  socket.off('update_maze');
+  socket.off('update_score');
   });
 
  
@@ -457,28 +467,50 @@ function drawSerializedMaze() {
   }
 
   async function stopSimulation() {
+    console.log(`Stopping simulation for user: ${$userEmail}`);
+    alert(`Stopping simulation for user: ${$userEmail}`);
+
     try {
-        const response = await fetch('http://localhost:5001/reset', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+      const resetResponse = await fetch('http://localhost:5001/reset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         }
+      });
 
-        const data = await response.json();
-        console.log('Reset response:', data.message);
-        alert(data.message); // Optionally alert the user about the reset.
+      if (!resetResponse.ok) {
+        throw new Error(`Reset failed with status: ${resetResponse.status}`);
+      }
+
+      const resetData = await resetResponse.json();
+      console.log('Reset response:', resetData.message);
+
+      const updateScoreResponse = await fetch('http://localhost:3000/api/update-software-score', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userEmail: $userEmail,
+          newScore: score
+        }),
+      });
+
+      if (!updateScoreResponse.ok) {
+        throw new Error(`Score update failed with status: ${updateScoreResponse.status}`);
+      }
+
+      const updateScoreData = await updateScoreResponse.json();
+      console.log('Score update response:', updateScoreData);
+      alert(`Score updated successfully. New Score: ${updateScoreData.softwareScore}`);
     } catch (error) {
-        console.error('Error resetting simulation:', error);
-        alert('Failed to reset simulation.');
+      console.error('Error during simulation stop:', error);
+      alert(`Failed to stop simulation or update score: ${error.message}`);
     }
   }
 
   async function resetSimulation() {
+    score = 0;
     // After resetting the simulation, generate a new random maze
     serializedMaze = generateMaze(16, 16); // Adjust dimensions as needed
     drawSerializedMaze(); // Redraw the maze with new data
@@ -500,11 +532,13 @@ function drawSerializedMaze() {
   <button class="thin-button-top" on:click={toggleSection}>Software</button>
   <button class="thin-button-top" on:click={toggleSection}>Hardware</button>
 </div>
-
 {#if showSoftware}
   <div class="is-flex is-flex-direction-column is-justify-content-center is-align-items-center is-square" id="software-section">
     <div class="has-text-centered">
       <h1 class="title is-1"style="padding:20px">Maze Simulator</h1>
+    </div>
+    <div class="score-container">
+      <h2>Score: {score}</h2> <!-- Display the score -->
     </div>
     <div class="is-flex is-justify-content-space-between" style="flex: 1; width: 100%;">
       <div style="flex: 1;">
@@ -760,6 +794,19 @@ function drawSerializedMaze() {
   color: #ffffff; /* Sets the title color to white */
 }
 
+
+
+.score-container {
+  position:static;       /* Position relative to nearest positioned ancestor */
+  top: 10px;                /* Distance from the top of the parent container */
+  right: 10px;              /* Distance from the right of the parent container */
+  background-color: #010000; /* Light background color for visibility */
+  color: #ffffff;              /* Text color */
+  padding: 10px 20px;       /* Padding inside the container */
+  border-radius: 8px;       /* Rounded corners */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+  z-index: 100;             /* Ensures it's above other content in the software section */
+}
 
 
 
