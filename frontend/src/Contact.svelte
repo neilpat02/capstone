@@ -6,23 +6,36 @@
 	let email = "";
 	let message = "";
 
-	const handleSubmit = async () => { 
-		try {
-		// Use template for the text boxes
-		const templateParams = {
-			from_email: email,
-			to_email: 'mazecomphero@gmail.com',
-			message: message,
-		};
+  /**
+   * Handles the submission of a contact form by sending an email using the EmailJS service.
+   *
+   * This function is called when the user submits the contact form. It retrieves the email and message
+   * from the form, creates the email template parameters, and sends the email using the EmailJS API.
+   * If the email is sent successfully, an alert is shown to the user. If there is an error, an error
+   * message is logged and an alert is shown to the user.
+   */
+  const handleSubmit = async () => {
+    try {
+      // Use template for the text boxes
+      const templateParams = {
+        from_email: email,
+        to_email: "mazecomphero@gmail.com",
+        message: message,
+      };
 
-		await emailjs.send('service_k9n8u89', 'template_z8jhgxg', templateParams, 'KuOnXFzA41_K7TY1A'); //send the email
+      await emailjs.send(
+        "service_k9n8u89",
+        "template_z8jhgxg",
+        templateParams,
+        "KuOnXFzA41_K7TY1A"
+      ); //send the email
 
-		alert('Email sent successfully!'); //send successfully
-		} catch (error) {
-		console.error('Error sending email:', error);
-		alert('Error sending email. Please try again.');
-		}
-	};
+      alert("Email sent successfully!"); //send successfully
+    } catch (error) {
+      console.error("Error sending email:", error);
+      alert("Error sending email. Please try again.");
+    }
+  };
 </script>
 
 <section class="hero is-small has-text-centered">

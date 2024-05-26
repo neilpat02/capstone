@@ -9,12 +9,19 @@
   let password = '';
   let loginMessage = '';
 
+  /**
+   * Handles the form submission for the login process.
+   * - Sends a POST request to the login API endpoint with the email and password.
+   * - If the login is successful, it saves the token, stores the email in the Svelte store, dispatches a 'login' event, and displays a success message.
+   * - If the login fails, it displays an error message.
+   * - Catches any errors that occur during the login process and displays an error message.
+   */
   async function handleSubmit() {
     try {
-      const response = await fetch('http://localhost:3000/api/login', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/api/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -24,7 +31,7 @@
       if (response.ok) {
         setToken(result.token); // Save the token using the setToken function
         userEmail.set(email); // Store the email in the Svelte store
-        dispatch('login'); // Dispatch event for successful login
+        dispatch("login"); // Dispatch event for successful login
         alert(`Logged in as: ${email}`); // Alert the email to the user
         loginMessage = "Login successful";
       } else {
@@ -37,15 +44,25 @@
     }
   }
 
+  /**
+   * Sends a password reset email to the provided email address.
+   *
+   * @async
+   * @function handleForgotPassword
+   * @returns {Promise<void>} - Resolves when the password reset email has been sent or an error has occurred.
+   */
   const handleForgotPassword = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/forgot-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const result = await response.json();
 

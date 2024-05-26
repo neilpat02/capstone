@@ -7,29 +7,47 @@
     let leaderboardType = 'software'; // Default leaderboard type
   
     // Fetch leaderboard data on mount
-    onMount(async () => {
-        await fetchLeaderboard();
-    });
+  /**
+   * Fetches the leaderboard data when the component is mounted.
+   */
+  onMount(async () => {
+    await fetchLeaderboard();
+  });
   
     // Function to fetch leaderboard data based on type
-    async function fetchLeaderboard() { //grab the leaderboard data based on who has signed up from the mongoDB server
-        try {
-            const response = await fetch(`http://localhost:3000/api/leaderboard?type=${leaderboardType}`);
-            if (response.ok) {
-                leaderboardData = await response.json();
-            } else {
-                console.error('Error fetching leaderboard data');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
+  /**
+   * Fetches the leaderboard data from the server based on the current leaderboard type.
+   *
+   * @async
+   * @function fetchLeaderboard
+   * @returns {Promise<void>} - Resolves when the leaderboard data has been fetched and stored in the `leaderboardData` variable.
+   */
+  async function fetchLeaderboard() {
+    //grab the leaderboard data based on who has signed up from the mongoDB server
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/leaderboard?type=${leaderboardType}`
+      );
+      if (response.ok) {
+        leaderboardData = await response.json();
+      } else {
+        console.error("Error fetching leaderboard data");
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
+  }
   
-    // Function to toggle between software and hardware leaderboard
-    function toggleLeaderboard() { //allows the user to check either the hardware scores or software scores
-        leaderboardType = leaderboardType === 'software' ? 'hardware' : 'software';
-        fetchLeaderboard();
-    }
+  /**
+   * Toggles the leaderboard type between software and hardware.
+   * When called, it updates the `leaderboardType` variable and then fetches the corresponding leaderboard data.
+   */
+  // Function to toggle between software and hardware leaderboard
+  function toggleLeaderboard() {
+    //allows the user to check either the hardware scores or software scores
+    leaderboardType = leaderboardType === "software" ? "hardware" : "software";
+    fetchLeaderboard();
+  }
   </script>
   
   

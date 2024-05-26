@@ -3,35 +3,43 @@
 	import Navi from "./widget/Navi.svelte";
     import { createEventDispatcher } from 'svelte';
     import { userEmail, userToken, setToken } from './userStore.js'; // Include setToken and userToken
-    let teamName = '';
-    let email = '';
-    let password = '';
-    const dispatch = createEventDispatcher();
+  /**
+   * Declares variables for team name, email, and password, and creates an event dispatcher.
+   */
+  let teamName = "";
+  let email = "";
+  let password = "";
+  const dispatch = createEventDispatcher();
     
-    async function handleSubmit() {
-        try {
-            const response = await fetch('http://localhost:3000/api/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({teamName, email, password}),
-            });
+  /**
+   * Handles the submission of the sign-up form.
+   *
+   * This function sends a POST request to the server's sign-up API endpoint with the user's team name, email, and password. If the sign-up is successful, it stores the token received from the server, updates the user email in the store, displays a success message, and dispatches a 'login' event. If there is an error, it displays an error message.
+   */
+  async function handleSubmit() {
+    try {
+      const response = await fetch("http://localhost:3000/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ teamName, email, password }),
+      });
 
-            const result = await response.json();
+      const result = await response.json();
 
-            if (response.ok) {
-                setToken(result.token); // Store the token from the server
-                userEmail.set(email); // Update the user email in the store
-                alert("Sign Up Successful!");
-                dispatch('login'); // Dispatch login event
-            } else {
-                alert(`Error: ${result.message}`);
-            }
-        } catch (error) {
-            alert(`Error Occurred: ${error.message}`);
-        }
+      if (response.ok) {
+        setToken(result.token); // Store the token from the server
+        userEmail.set(email); // Update the user email in the store
+        alert("Sign Up Successful!");
+        dispatch("login"); // Dispatch login event
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      alert(`Error Occurred: ${error.message}`);
     }
+  }
 </script>
 
 <section class="hero is-small has-text-centered">

@@ -21,37 +21,45 @@
   
 
 
+  /**
+   * Uploads the current editor text and the serialized maze to the backend servers.
+   * This function first sends the user's email to the local server at `http://localhost:3000/api/upload-to-bot`
+   * to update the timestamp. It then sends the `editorText` and `serializedMaze` to the Flask backend at
+   * `http://localhost:5001/upload_to_bot` to upload the code and maze data.
+   * If the uploads are successful, it displays success messages. If there are any errors, it logs the errors
+   * and displays error messages to the user.
+   */
   async function uploadToBot() {
-  // Since you already have userCurrentEmail reactive variable
-  alert('Code to upload:\n' + editorText);
-  try {
-    const response = await fetch('http://localhost:3000/api/upload-to-bot', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: userCurrentEmail, // Use the user's email to identify the team
-      }),
-    });
+    // Since you already have userCurrentEmail reactive variable
+    alert("Code to upload:\n" + editorText);
+    try {
+      const response = await fetch("http://localhost:3000/api/upload-to-bot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: userCurrentEmail, // Use the user's email to identify the team
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error('Failed to update timestamp');
+      if (!response.ok) {
+        throw new Error("Failed to update timestamp");
+      }
+
+      const result = await response.json();
+      console.log(result.message); // Log the success message
+      alert("Upload to bot initiated and timestamp updated successfully.");
+    } catch (error) {
+      console.error("Error uploading to the bot:", error);
+      alert("Error in uploading to the bot. Please try again.");
     }
 
-    const result = await response.json();
-    console.log(result.message); // Log the success message
-    alert('Upload to bot initiated and timestamp updated successfully.');
-  } catch (error) {
-    console.error('Error uploading to the bot:', error);
-    alert('Error in uploading to the bot. Please try again.');
-  }
-
-  try {
-      const flaskResponse = await fetch('http://localhost:5001/upload_to_bot', {
-        method: 'POST',
+    try {
+      const flaskResponse = await fetch("http://localhost:5001/upload_to_bot", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           algorithm_code: editorText, // Send the code from the editor
@@ -60,47 +68,73 @@
       });
 
       if (!flaskResponse.ok) {
-        throw new Error('Failed to send code to Flask backend');
+        throw new Error("Failed to send code to Flask backend");
       }
 
       const flaskResult = await flaskResponse.json();
-      console.log('Code sent to Flask backend:', flaskResult);
-      alert('Code uploaded to bot successfully.');
+      console.log("Code sent to Flask backend:", flaskResult);
+      alert("Code uploaded to bot successfully.");
     } catch (flaskError) {
-      console.error('Error sending code to Flask backend:', flaskError);
-      alert('Failed to upload code to bot. Please try again.');
+      console.error("Error sending code to Flask backend:", flaskError);
+      alert("Failed to upload code to bot. Please try again.");
     }
+  }
 
-}
 
-
-function generateMaze(cols, rows) {
+  /**
+   * Generates a maze with randomly placed robots.
+   *
+   * @param {number} cols - The number of columns in the maze.
+   * @param {number} rows - The number of rows in the maze.
+   * @returns {Object[]} - An array of maze cells, each with information about its walls and the robots in it.
+   */
+  function generateMaze(cols, rows) {
     let grid = [];
     let robotPositions = [];
 
     // Randomly assign initial positions to each robot
     while (robotPositions.length < 4) {
-        let i = Math.floor(Math.random() * cols);
-        let j = Math.floor(Math.random() * rows);
-        let posKey = `${i}-${j}`;
+      let i = Math.floor(Math.random() * cols);
+      let j = Math.floor(Math.random() * rows);
+      let posKey = `${i}-${j}`;
 
-        if (!robotPositions.includes(posKey)) {
-            robotPositions.push(posKey);
-        }
+      if (!robotPositions.includes(posKey)) {
+        robotPositions.push(posKey);
+      }
     }
 
     for (let j = 0; j < rows; j++) {
-        for (let i = 0; i < cols; i++) {
-            let cell = new Cell(i, j, cols, rows, grid);
-            // Initialize robots based on the randomized positions
-            cell.robots = [
-                { id: 1, isHere: robotPositions[0] === `${i}-${j}`, visited: robotPositions[0] === `${i}-${j}`, direction: null },
-                { id: 2, isHere: robotPositions[1] === `${i}-${j}`, visited: robotPositions[1] === `${i}-${j}`, direction: null },
-                { id: 3, isHere: robotPositions[2] === `${i}-${j}`, visited: robotPositions[2] === `${i}-${j}`, direction: null },
-                { id: 4, isHere: robotPositions[3] === `${i}-${j}`, visited: robotPositions[3] === `${i}-${j}`, direction: null }
-            ];
-            grid.push(cell);
-        }
+      for (let i = 0; i < cols; i++) {
+        let cell = new Cell(i, j, cols, rows, grid);
+        // Initialize robots based on the randomized positions
+        cell.robots = [
+          {
+            id: 1,
+            isHere: robotPositions[0] === `${i}-${j}`,
+            visited: robotPositions[0] === `${i}-${j}`,
+            direction: null,
+          },
+          {
+            id: 2,
+            isHere: robotPositions[1] === `${i}-${j}`,
+            visited: robotPositions[1] === `${i}-${j}`,
+            direction: null,
+          },
+          {
+            id: 3,
+            isHere: robotPositions[2] === `${i}-${j}`,
+            visited: robotPositions[2] === `${i}-${j}`,
+            direction: null,
+          },
+          {
+            id: 4,
+            isHere: robotPositions[3] === `${i}-${j}`,
+            visited: robotPositions[3] === `${i}-${j}`,
+            direction: null,
+          },
+        ];
+        grid.push(cell);
+      }
     }
 
     let current = grid[0]; // Start maze generation from the first cell
@@ -108,27 +142,35 @@ function generateMaze(cols, rows) {
 
     let stack = [];
     do {
-        let next = current.checkNeighbors();
-        if (next) {
-            next.visited = true;
-            stack.push(current);
-            removeWalls(current, next);
-            current = next;
-        } else if (stack.length > 0) {
-            current = stack.pop();
-        }
+      let next = current.checkNeighbors();
+      if (next) {
+        next.visited = true;
+        stack.push(current);
+        removeWalls(current, next);
+        current = next;
+      } else if (stack.length > 0) {
+        current = stack.pop();
+      }
     } while (stack.length > 0);
 
-    return grid.map(cell => ({
-        i: cell.i,
-        j: cell.j,
-        walls: cell.walls,
-        robots: cell.robots.map(robot => ({
-            ...robot,
-            direction: robot.isHere ? (robot.id === 1 ? 'S' : robot.id === 2 ? 'N' : robot.id === 3 ? 'E' : 'W') : null
-        }))
+    return grid.map((cell) => ({
+      i: cell.i,
+      j: cell.j,
+      walls: cell.walls,
+      robots: cell.robots.map((robot) => ({
+        ...robot,
+        direction: robot.isHere
+          ? robot.id === 1
+            ? "S"
+            : robot.id === 2
+              ? "N"
+              : robot.id === 3
+                ? "E"
+                : "W"
+          : null,
+      })),
     }));
-}
+  }
 
 
 
@@ -136,49 +178,69 @@ function generateMaze(cols, rows) {
 
 
 
-class Cell {
+/**
+   * Represents a cell in a maze grid.
+   * Each cell has properties to track its walls, visited status, and whether the robot is present.
+   * The class also provides methods to check the neighboring cells.
+   */
+  class Cell {
     constructor(i, j, cols, rows, grid) {
-        this.i = i;
-        this.j = j;
-        this.walls = [true, true, true, true]; // Top, right, bottom, left walls
-        this.visited = false; // Flag to mark if the cell has been visited during maze generation
-        this.cols = cols; // Total columns in the maze
-        this.rows = rows; // Total rows in the maze
-        this.grid = grid; // Reference to the entire grid for checking neighbors
-        // Initialize isRobotHere and robotVisited properties
-        this.isRobotHere = false;
-        this.robotVisited = false;
+      this.i = i;
+      this.j = j;
+      this.walls = [true, true, true, true]; // Top, right, bottom, left walls
+      this.visited = false; // Flag to mark if the cell has been visited during maze generation
+      this.cols = cols; // Total columns in the maze
+      this.rows = rows; // Total rows in the maze
+      this.grid = grid; // Reference to the entire grid for checking neighbors
+      // Initialize isRobotHere and robotVisited properties
+      this.isRobotHere = false;
+      this.robotVisited = false;
     }
 
     checkNeighbors() {
-        let neighbors = [];
+      let neighbors = [];
 
-        let top = this.index(this.i, this.j - 1);
-        let right = this.index(this.i + 1, this.j);
-        let bottom = this.index(this.i, this.j + 1);
-        let left = this.index(this.i - 1, this.j);
+      let top = this.index(this.i, this.j - 1);
+      let right = this.index(this.i + 1, this.j);
+      let bottom = this.index(this.i, this.j + 1);
+      let left = this.index(this.i - 1, this.j);
 
-        if (top !== -1 && !this.grid[top].visited) neighbors.push(this.grid[top]);
-        if (right !== -1 && !this.grid[right].visited) neighbors.push(this.grid[right]);
-        if (bottom !== -1 && !this.grid[bottom].visited) neighbors.push(this.grid[bottom]);
-        if (left !== -1 && !this.grid[left].visited) neighbors.push(this.grid[left]);
+      if (top !== -1 && !this.grid[top].visited) neighbors.push(this.grid[top]);
+      if (right !== -1 && !this.grid[right].visited)
+        neighbors.push(this.grid[right]);
+      if (bottom !== -1 && !this.grid[bottom].visited)
+        neighbors.push(this.grid[bottom]);
+      if (left !== -1 && !this.grid[left].visited)
+        neighbors.push(this.grid[left]);
 
-        if (neighbors.length > 0) {
-            let r = Math.floor(Math.random() * neighbors.length);
-            return neighbors[r];
-        } else {
-            return undefined;
-        }
+      if (neighbors.length > 0) {
+        let r = Math.floor(Math.random() * neighbors.length);
+        return neighbors[r];
+      } else {
+        return undefined;
+      }
     }
 
     index(i, j) {
-        if (i < 0 || j < 0 || i >= this.cols || j >= this.rows) {
-            return -1;
-        }
-        return i + j * this.cols;
+      if (i < 0 || j < 0 || i >= this.cols || j >= this.rows) {
+        return -1;
+      }
+      return i + j * this.cols;
     }
-}
+  }
 
+/**
+ * Removes the walls between two adjacent cells in the maze.
+ *
+ * @param {Object} a - The first cell object.
+ * @param {number} a.i - The row index of the first cell.
+ * @param {number} a.j - The column index of the first cell.
+ * @param {boolean[]} a.walls - An array of 4 booleans representing the walls of the first cell (top, right, bottom, left).
+ * @param {Object} b - The second cell object.
+ * @param {number} b.i - The row index of the second cell.
+ * @param {number} b.j - The column index of the second cell.
+ * @param {boolean[]} b.walls - An array of 4 booleans representing the walls of the second cell (top, right, bottom, left).
+ */
 function removeWalls(a, b) {
     let x = a.i - b.i;
     if (x === 1) {
@@ -200,92 +262,121 @@ function removeWalls(a, b) {
 }
   
 
-function drawSerializedMaze() {
-  if (p5Sketch) {
-    p5Sketch.remove();
-    p5Sketch = null;
-  }
+  /**
+   * Draws the serialized maze on a P5.js canvas.
+   * This function is responsible for rendering the maze, including the visited shading, walls, and robot positions.
+   * It uses the `serializedMaze` data structure to determine the layout and state of the maze.
+   */
+  function drawSerializedMaze() {
+    if (p5Sketch) {
+      p5Sketch.remove();
+      p5Sketch = null;
+    }
 
-  p5Sketch = new p5((p) => {
-    const wid = 30; // Width and height of each cell
-    const cols = 16; // Number of columns
-    const rows = 16; // Number of rows
+    p5Sketch = new p5((p) => {
+      const wid = 30; // Width and height of each cell
+      const cols = 16; // Number of columns
+      const rows = 16; // Number of rows
 
-    p.setup = () => {
-      p.createCanvas(cols * wid, rows * wid);
-      p.noLoop(); // Ensures that the draw function is called only once
-    };
+      p.setup = () => {
+        p.createCanvas(cols * wid, rows * wid);
+        p.noLoop(); // Ensures that the draw function is called only once
+      };
 
-    p.draw = () => {
-      p.background(255);
+      p.draw = () => {
+        p.background(255);
 
-      // First, draw the visited shading for each cell
-      serializedMaze.forEach(cellData => {
-        const x = cellData.i * wid;
-        const y = cellData.j * wid;
+        // First, draw the visited shading for each cell
+        serializedMaze.forEach((cellData) => {
+          const x = cellData.i * wid;
+          const y = cellData.j * wid;
 
-        cellData.robots.forEach(robot => {
-          // Apply shading only if the robot has visited, excluding the current position
-          if (robot.visited) {
-            let fillColor = 'rgba(200, 200, 200, 100)'; // Default gray shade
-            switch(robot.id) {
-              case 1: fillColor = 'rgba(255, 102, 102, 100)'; break; // Light red
-              case 2: fillColor = 'rgba(102, 204, 255, 100)'; break; // Light blue
-              case 3: fillColor = 'rgba(153, 255, 153, 100)'; break; // Light green
-              case 4: fillColor = 'rgba(171, 141, 237, 100)'; break; // Light Purple
-            }
-            p.fill(fillColor);
-            p.noStroke();
-            p.rect(x, y, wid, wid);
-          }
-        });
-      });
-
-      // Then, draw walls and robots to ensure they are not covered by the shading
-      serializedMaze.forEach(cellData => {
-        const x = cellData.i * wid;
-        const y = cellData.j * wid;
-
-        // Draws the walls of the cell
-        p.stroke(0);
-        if (cellData.walls[0]) p.line(x, y, x + wid, y);
-        if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid);
-        if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid);
-        if (cellData.walls[3]) p.line(x, y + wid, x, y);
-
-        // Draw each robot in its current cell
-        cellData.robots.forEach(robot => {
-          if (robot.isHere) {
-            let fillColor = 'rgba(200, 200, 200, 255)'; // Default gray
-            switch(robot.id) {
-              case 1: fillColor = 'rgba(200, 100, 0, 255)'; break; // Red
-              case 2: fillColor = 'rgba(0, 100, 200, 255)'; break; // Blue
-              case 3: fillColor = 'rgba(100, 200, 0, 255)'; break; // Green
-              case 4: fillColor = 'rgba(108, 0, 255, 255)'; break; // Purple
-            }
-            p.fill(fillColor);
-            p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
-
-            // Optional: Direction line for the robot
-            let lineEndX = x + wid / 2;
-            let lineEndY = y + wid / 2;
-            const directionLineLength = wid / 4;
-            if (robot.direction) {
-              switch (robot.direction) {
-                case 'N': lineEndY -= directionLineLength; break;
-                case 'E': lineEndX += directionLineLength; break;
-                case 'S': lineEndY += directionLineLength; break;
-                case 'W': lineEndX -= directionLineLength; break;
+          cellData.robots.forEach((robot) => {
+            // Apply shading only if the robot has visited, excluding the current position
+            if (robot.visited) {
+              let fillColor = "rgba(200, 200, 200, 100)"; // Default gray shade
+              switch (robot.id) {
+                case 1:
+                  fillColor = "rgba(255, 102, 102, 100)";
+                  break; // Light red
+                case 2:
+                  fillColor = "rgba(102, 204, 255, 100)";
+                  break; // Light blue
+                case 3:
+                  fillColor = "rgba(153, 255, 153, 100)";
+                  break; // Light green
+                case 4:
+                  fillColor = "rgba(171, 141, 237, 100)";
+                  break; // Light Purple
               }
-              p.stroke(255); // White for visibility
-              p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY);
+              p.fill(fillColor);
+              p.noStroke();
+              p.rect(x, y, wid, wid);
             }
-          }
+          });
         });
-      });
-    };
-  }, mazeContainer);
-}
+
+        // Then, draw walls and robots to ensure they are not covered by the shading
+        serializedMaze.forEach((cellData) => {
+          const x = cellData.i * wid;
+          const y = cellData.j * wid;
+
+          // Draws the walls of the cell
+          p.stroke(0);
+          if (cellData.walls[0]) p.line(x, y, x + wid, y);
+          if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid);
+          if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid);
+          if (cellData.walls[3]) p.line(x, y + wid, x, y);
+
+          // Draw each robot in its current cell
+          cellData.robots.forEach((robot) => {
+            if (robot.isHere) {
+              let fillColor = "rgba(200, 200, 200, 255)"; // Default gray
+              switch (robot.id) {
+                case 1:
+                  fillColor = "rgba(200, 100, 0, 255)";
+                  break; // Red
+                case 2:
+                  fillColor = "rgba(0, 100, 200, 255)";
+                  break; // Blue
+                case 3:
+                  fillColor = "rgba(100, 200, 0, 255)";
+                  break; // Green
+                case 4:
+                  fillColor = "rgba(108, 0, 255, 255)";
+                  break; // Purple
+              }
+              p.fill(fillColor);
+              p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
+
+              // Optional: Direction line for the robot
+              let lineEndX = x + wid / 2;
+              let lineEndY = y + wid / 2;
+              const directionLineLength = wid / 4;
+              if (robot.direction) {
+                switch (robot.direction) {
+                  case "N":
+                    lineEndY -= directionLineLength;
+                    break;
+                  case "E":
+                    lineEndX += directionLineLength;
+                    break;
+                  case "S":
+                    lineEndY += directionLineLength;
+                    break;
+                  case "W":
+                    lineEndX -= directionLineLength;
+                    break;
+                }
+                p.stroke(255); // White for visibility
+                p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY);
+              }
+            }
+          });
+        });
+      };
+    }, mazeContainer);
+  }
 
 
 
@@ -377,39 +468,59 @@ function drawSerializedMaze() {
 
 
 
+  /**
+   * Fetches saved files for the current user from the server.
+   *
+   * This function sends a GET request to the `/api/get-texts` endpoint on the server,
+   * passing the user's email and authentication token as headers. If the request is
+   * successful, the fetched files are stored in the `savedFiles` variable. If the
+   * request fails, an alert is shown to the user.
+   */
   async function fetchSavedFiles() {
-    const response = await fetch(`http://localhost:3000/api/get-texts?userEmail=${$userEmail}`, {
-      method: 'GET',
-      headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${$userToken}` // Include the JWT in requests
-      },
-    });
+    const response = await fetch(
+      `http://localhost:3000/api/get-texts?userEmail=${$userEmail}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${$userToken}`, // Include the JWT in requests
+        },
+      }
+    );
 
     if (response.ok) {
-        savedFiles = await response.json();
-        console.log(savedFiles); // Correctly logging the fetched files
+      savedFiles = await response.json();
+      console.log(savedFiles); // Correctly logging the fetched files
     } else {
-        alert('Failed to fetch files.');
+      alert("Failed to fetch files.");
     }
   }
 
+  /**
+   * Loads the content of a selected file and copies it to the clipboard.
+   *
+   * @param {Event} event - The event object containing the selected file.
+   * @returns {Promise<void>} - A Promise that resolves when the file content has been copied to the clipboard.
+   */
   async function loadFileContent(event) {
     const selectedFileName = event.target.value;
-    const selectedFile = savedFiles.find(file => file.fileName === selectedFileName);
+    const selectedFile = savedFiles.find(
+      (file) => file.fileName === selectedFileName
+    );
     if (selectedFile) {
       try {
         await navigator.clipboard.writeText(selectedFile.content);
-        console.log('File content copied to clipboard.');
-        alert('File content copied to clipboard.'); // Optional: Inform the user
+        console.log("File content copied to clipboard.");
+        alert("File content copied to clipboard."); // Optional: Inform the user
       } catch (error) {
-        console.error('Could not copy text to clipboard', error);
-        alert('Failed to copy file content to clipboard.');
+        console.error("Could not copy text to clipboard", error);
+        alert("Failed to copy file content to clipboard.");
       }
     } else {
-      console.error('Selected file content not found');
+      console.error("Selected file content not found");
     }
   }
+
   function toggleDropdownAnimation() {
     const dropdown = document.querySelector('.file-dropdown');
     if (dropdown) {
@@ -424,33 +535,47 @@ function drawSerializedMaze() {
 
 
 
+  /**
+   * Runs a simulation using the provided algorithm code and serialized maze data.
+   *
+   * This function sends a POST request to the backend server at `http://localhost:5001/run` with the algorithm code and serialized maze data. It then logs the simulation result to the console.
+   *
+   * @param {string} editorText - The algorithm code to be used in the simulation.
+   * @param {string} serializedMaze - The serialized maze data to be used in the simulation.
+   * @returns {Promise<void>} - A Promise that resolves when the simulation is complete.
+   */
   async function runSimulation() {
-      const algorithmCode = editorText; // Your algorithm code here)
-      const serializedMazeSent = serializedMaze;
-      try {
-          const response = await fetch('http://localhost:5001/run', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                  algorithm_code: algorithmCode,
-                  serializedMaze: serializedMazeSent,
-              }),
-          });
+    const algorithmCode = editorText; // Your algorithm code here)
+    const serializedMazeSent = serializedMaze;
+    try {
+      const response = await fetch("http://localhost:5001/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          algorithm_code: algorithmCode,
+          serializedMaze: serializedMazeSent,
+        }),
+      });
 
-          if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          console.log('Simulation result:', data);
-          // Update your front-end accordingly with the received data
-      } catch (error) {
-          console.error('Error running simulation:', error);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const data = await response.json();
+      console.log("Simulation result:", data);
+      // Update your front-end accordingly with the received data
+    } catch (error) {
+      console.error("Error running simulation:", error);
+    }
   }
 
+  /**
+   * Handles the click event of the run button in the maze simulation.
+   * This function serializes the current maze data to a JSON string and copies it to the clipboard.
+   * If the copy operation is successful, an alert is shown to the user. If an error occurs, an error alert is shown instead.
+   */
   async function handleRunButtonClick() {
     try {
       // Serialize the maze data to a JSON string
@@ -458,24 +583,37 @@ function drawSerializedMaze() {
       // Copy the serialized data to the clipboard
       await navigator.clipboard.writeText(serializedData);
       // Alert the user that the data has been copied
-      alert('Serialized maze data has been copied to clipboard.');
+      alert("Serialized maze data has been copied to clipboard.");
     } catch (error) {
-      console.error('Error copying serialized maze data to clipboard:', error);
+      console.error("Error copying serialized maze data to clipboard:", error);
       // Alert the user in case of an error
-      alert('Failed to copy serialized maze data to clipboard.');
+      alert("Failed to copy serialized maze data to clipboard.");
     }
   }
 
+  /**
+   * Stops the current simulation and updates the user's software score.
+   *
+   * This function performs the following steps:
+   * 1. Logs a message to the console and displays an alert indicating that the simulation is being stopped.
+   * 2. Sends a POST request to the `/reset` endpoint to reset the simulation.
+   * 3. If the reset is successful, sends a PATCH request to the `/api/update-software-score` endpoint to update the user's software score.
+   * 4. Displays an alert with the updated software score.
+   *
+   * @async
+   * @function
+   * @throws {Error} If there is an error during the reset or score update process.
+   */
   async function stopSimulation() {
     console.log(`Stopping simulation for user: ${$userEmail}`);
     alert(`Stopping simulation for user: ${$userEmail}`);
 
     try {
-      const resetResponse = await fetch('http://localhost:5001/reset', {
-        method: 'POST',
+      const resetResponse = await fetch("http://localhost:5001/reset", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-        }
+          "Content-Type": "application/json",
+        },
       });
 
       if (!resetResponse.ok) {
@@ -483,28 +621,35 @@ function drawSerializedMaze() {
       }
 
       const resetData = await resetResponse.json();
-      console.log('Reset response:', resetData.message);
+      console.log("Reset response:", resetData.message);
 
-      const updateScoreResponse = await fetch('http://localhost:3000/api/update-software-score', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userEmail: $userEmail,
-          newScore: score
-        }),
-      });
+      const updateScoreResponse = await fetch(
+        "http://localhost:3000/api/update-software-score",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userEmail: $userEmail,
+            newScore: score,
+          }),
+        }
+      );
 
       if (!updateScoreResponse.ok) {
-        throw new Error(`Score update failed with status: ${updateScoreResponse.status}`);
+        throw new Error(
+          `Score update failed with status: ${updateScoreResponse.status}`
+        );
       }
 
       const updateScoreData = await updateScoreResponse.json();
-      console.log('Score update response:', updateScoreData);
-      alert(`Score updated successfully. New Score: ${updateScoreData.softwareScore}`);
+      console.log("Score update response:", updateScoreData);
+      alert(
+        `Score updated successfully. New Score: ${updateScoreData.softwareScore}`
+      );
     } catch (error) {
-      console.error('Error during simulation stop:', error);
+      console.error("Error during simulation stop:", error);
       alert(`Failed to stop simulation or update score: ${error.message}`);
     }
   }
