@@ -19,8 +19,6 @@ app.use(cors());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
 });
 
 // defining a route to test (can be deleted later)
