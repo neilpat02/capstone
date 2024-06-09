@@ -13,7 +13,7 @@
   import LeaderBoard from "./LeaderBoard.svelte";
   import MazeSim from "./MazeSim.svelte";
   import Contact from "./Contact.svelte";
-  import { userToken, clearToken } from "./userStore.js";
+  import { userToken, clearToken, isTokenExpired } from "./userStore.js";
 
   let showDropdown = false;
   export let menu = 1;
@@ -22,13 +22,21 @@
   /**
    * Initializes the user's login state and token when the component mounts.
    * This function retrieves the JWT token from the browser's local storage,
-   * sets the `isLoggedIn` store to `true` if a token is present, and sets
-   * the `userToken` store to the retrieved token value.
+   * sets the `isLoggedIn` store to `true` if a token is present and not expired, 
+   * and sets the `userToken` store to the retrieved token value.
    */
   onMount(() => {
     const token = localStorage.getItem("jwtToken");
-    isLoggedIn.set(!!token);
-    userToken.set(token);
+    if (token && !isTokenExpired()) {
+      isLoggedIn.set(true);
+      userToken.set(token);
+    } else {
+      clearToken();
+      isLoggedIn.set(false);
+      if (token) {
+        alert("Session expired. Please log in again.");
+      }
+    }
   });
 
   /**
@@ -80,7 +88,6 @@
  * 6. If `menu` is 6, the `Contact` component is rendered.
  * 7. If `menu` doesn't match any of the above values, a default message "404 Page Not Found" is displayed.
  *
-
  -->
 <nav id="menu" class="navbar" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
@@ -121,4 +128,3 @@
 {:else}
   <h1>404 Page Not Found</h1>
 {/if}
-

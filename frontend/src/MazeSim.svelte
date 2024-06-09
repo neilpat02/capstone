@@ -18,19 +18,8 @@
   $: userCurrentEmail = $userEmail; 
   let p5Sketch = null;
   let score = 0; // Initialize score
-  
 
-
-  /**
-   * Uploads the current editor text and the serialized maze to the backend servers.
-   * This function first sends the user's email to the local server at `http://localhost:3000/api/upload-to-bot`
-   * to update the timestamp. It then sends the `editorText` and `serializedMaze` to the Flask backend at
-   * `http://localhost:5001/upload_to_bot` to upload the code and maze data.
-   * If the uploads are successful, it displays success messages. If there are any errors, it logs the errors
-   * and displays error messages to the user.
-   */
   async function uploadToBot() {
-    // Since you already have userCurrentEmail reactive variable
     alert("Code to upload:\n" + editorText);
     try {
       const response = await fetch("http://localhost:3000/api/upload-to-bot", {
@@ -48,7 +37,7 @@
       }
 
       const result = await response.json();
-      console.log(result.message); // Log the success message
+      console.log(result.message);
       alert("Upload to bot initiated and timestamp updated successfully.");
     } catch (error) {
       console.error("Error uploading to the bot:", error);
@@ -62,8 +51,8 @@
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          algorithm_code: editorText, // Send the code from the editor
-          serializedMaze: serializedMaze, // Assuming serializedMaze is also required by your Flask backend
+          algorithm_code: editorText,
+          serializedMaze: serializedMaze,
         }),
       });
 
@@ -80,19 +69,10 @@
     }
   }
 
-
-  /**
-   * Generates a maze with randomly placed robots.
-   *
-   * @param {number} cols - The number of columns in the maze.
-   * @param {number} rows - The number of rows in the maze.
-   * @returns {Object[]} - An array of maze cells, each with information about its walls and the robots in it.
-   */
   function generateMaze(cols, rows) {
     let grid = [];
     let robotPositions = [];
 
-    // Randomly assign initial positions to each robot
     while (robotPositions.length < 4) {
       let i = Math.floor(Math.random() * cols);
       let j = Math.floor(Math.random() * rows);
@@ -106,38 +86,17 @@
     for (let j = 0; j < rows; j++) {
       for (let i = 0; i < cols; i++) {
         let cell = new Cell(i, j, cols, rows, grid);
-        // Initialize robots based on the randomized positions
         cell.robots = [
-          {
-            id: 1,
-            isHere: robotPositions[0] === `${i}-${j}`,
-            visited: robotPositions[0] === `${i}-${j}`,
-            direction: null,
-          },
-          {
-            id: 2,
-            isHere: robotPositions[1] === `${i}-${j}`,
-            visited: robotPositions[1] === `${i}-${j}`,
-            direction: null,
-          },
-          {
-            id: 3,
-            isHere: robotPositions[2] === `${i}-${j}`,
-            visited: robotPositions[2] === `${i}-${j}`,
-            direction: null,
-          },
-          {
-            id: 4,
-            isHere: robotPositions[3] === `${i}-${j}`,
-            visited: robotPositions[3] === `${i}-${j}`,
-            direction: null,
-          },
+          { id: 1, isHere: robotPositions[0] === `${i}-${j}`, visited: robotPositions[0] === `${i}-${j}`, direction: null },
+          { id: 2, isHere: robotPositions[1] === `${i}-${j}`, visited: robotPositions[1] === `${i}-${j}`, direction: null },
+          { id: 3, isHere: robotPositions[2] === `${i}-${j}`, visited: robotPositions[2] === `${i}-${j}`, direction: null },
+          { id: 4, isHere: robotPositions[3] === `${i}-${j}`, visited: robotPositions[3] === `${i}-${j}`, direction: null },
         ];
         grid.push(cell);
       }
     }
 
-    let current = grid[0]; // Start maze generation from the first cell
+    let current = grid[0];
     current.visited = true;
 
     let stack = [];
@@ -172,46 +131,30 @@
     }));
   }
 
-
-
-
-
-
-
-/**
-   * Represents a cell in a maze grid.
-   * Each cell has properties to track its walls, visited status, and whether the robot is present.
-   * The class also provides methods to check the neighboring cells.
-   */
   class Cell {
     constructor(i, j, cols, rows, grid) {
       this.i = i;
       this.j = j;
-      this.walls = [true, true, true, true]; // Top, right, bottom, left walls
-      this.visited = false; // Flag to mark if the cell has been visited during maze generation
-      this.cols = cols; // Total columns in the maze
-      this.rows = rows; // Total rows in the maze
-      this.grid = grid; // Reference to the entire grid for checking neighbors
-      // Initialize isRobotHere and robotVisited properties
+      this.walls = [true, true, true, true];
+      this.visited = false;
+      this.cols = cols;
+      this.rows = rows;
+      this.grid = grid;
       this.isRobotHere = false;
       this.robotVisited = false;
     }
 
     checkNeighbors() {
       let neighbors = [];
-
       let top = this.index(this.i, this.j - 1);
       let right = this.index(this.i + 1, this.j);
       let bottom = this.index(this.i, this.j + 1);
       let left = this.index(this.i - 1, this.j);
 
       if (top !== -1 && !this.grid[top].visited) neighbors.push(this.grid[top]);
-      if (right !== -1 && !this.grid[right].visited)
-        neighbors.push(this.grid[right]);
-      if (bottom !== -1 && !this.grid[bottom].visited)
-        neighbors.push(this.grid[bottom]);
-      if (left !== -1 && !this.grid[left].visited)
-        neighbors.push(this.grid[left]);
+      if (right !== -1 && !this.grid[right].visited) neighbors.push(this.grid[right]);
+      if (bottom !== -1 && !this.grid[bottom].visited) neighbors.push(this.grid[bottom]);
+      if (left !== -1 && !this.grid[left].visited) neighbors.push(this.grid[left]);
 
       if (neighbors.length > 0) {
         let r = Math.floor(Math.random() * neighbors.length);
@@ -229,44 +172,26 @@
     }
   }
 
-/**
- * Removes the walls between two adjacent cells in the maze.
- *
- * @param {Object} a - The first cell object.
- * @param {number} a.i - The row index of the first cell.
- * @param {number} a.j - The column index of the first cell.
- * @param {boolean[]} a.walls - An array of 4 booleans representing the walls of the first cell (top, right, bottom, left).
- * @param {Object} b - The second cell object.
- * @param {number} b.i - The row index of the second cell.
- * @param {number} b.j - The column index of the second cell.
- * @param {boolean[]} b.walls - An array of 4 booleans representing the walls of the second cell (top, right, bottom, left).
- */
-function removeWalls(a, b) {
+  function removeWalls(a, b) {
     let x = a.i - b.i;
     if (x === 1) {
-        a.walls[3] = false;
-        b.walls[1] = false;
+      a.walls[3] = false;
+      b.walls[1] = false;
     } else if (x === -1) {
-        a.walls[1] = false;
-        b.walls[3] = false;
+      a.walls[1] = false;
+      b.walls[3] = false;
     }
 
     let y = a.j - b.j;
     if (y === 1) {
-        a.walls[0] = false;
-        b.walls[2] = false;
+      a.walls[0] = false;
+      b.walls[2] = false;
     } else if (y === -1) {
-        a.walls[2] = false;
-        b.walls[0] = false;
+      a.walls[2] = false;
+      b.walls[0] = false;
     }
-}
-  
+  }
 
-  /**
-   * Draws the serialized maze on a P5.js canvas.
-   * This function is responsible for rendering the maze, including the visited shading, walls, and robot positions.
-   * It uses the `serializedMaze` data structure to determine the layout and state of the maze.
-   */
   function drawSerializedMaze() {
     if (p5Sketch) {
       p5Sketch.remove();
@@ -274,40 +199,38 @@ function removeWalls(a, b) {
     }
 
     p5Sketch = new p5((p) => {
-      const wid = 30; // Width and height of each cell
-      const cols = 16; // Number of columns
-      const rows = 16; // Number of rows
+      const wid = 30;
+      const cols = 16;
+      const rows = 16;
 
       p.setup = () => {
         p.createCanvas(cols * wid, rows * wid);
-        p.noLoop(); // Ensures that the draw function is called only once
+        p.noLoop();
       };
 
       p.draw = () => {
         p.background(255);
 
-        // First, draw the visited shading for each cell
         serializedMaze.forEach((cellData) => {
           const x = cellData.i * wid;
           const y = cellData.j * wid;
 
           cellData.robots.forEach((robot) => {
-            // Apply shading only if the robot has visited, excluding the current position
             if (robot.visited) {
-              let fillColor = "rgba(200, 200, 200, 100)"; // Default gray shade
+              let fillColor = "rgba(200, 200, 200, 100)";
               switch (robot.id) {
                 case 1:
                   fillColor = "rgba(255, 102, 102, 100)";
-                  break; // Light red
+                  break;
                 case 2:
                   fillColor = "rgba(102, 204, 255, 100)";
-                  break; // Light blue
+                  break;
                 case 3:
                   fillColor = "rgba(153, 255, 153, 100)";
-                  break; // Light green
+                  break;
                 case 4:
                   fillColor = "rgba(171, 141, 237, 100)";
-                  break; // Light Purple
+                  break;
               }
               p.fill(fillColor);
               p.noStroke();
@@ -316,40 +239,36 @@ function removeWalls(a, b) {
           });
         });
 
-        // Then, draw walls and robots to ensure they are not covered by the shading
         serializedMaze.forEach((cellData) => {
           const x = cellData.i * wid;
           const y = cellData.j * wid;
 
-          // Draws the walls of the cell
           p.stroke(0);
           if (cellData.walls[0]) p.line(x, y, x + wid, y);
           if (cellData.walls[1]) p.line(x + wid, y, x + wid, y + wid);
           if (cellData.walls[2]) p.line(x + wid, y + wid, x, y + wid);
           if (cellData.walls[3]) p.line(x, y + wid, x, y);
 
-          // Draw each robot in its current cell
           cellData.robots.forEach((robot) => {
             if (robot.isHere) {
-              let fillColor = "rgba(200, 200, 200, 255)"; // Default gray
+              let fillColor = "rgba(200, 200, 200, 255)";
               switch (robot.id) {
                 case 1:
                   fillColor = "rgba(200, 100, 0, 255)";
-                  break; // Red
+                  break;
                 case 2:
                   fillColor = "rgba(0, 100, 200, 255)";
-                  break; // Blue
+                  break;
                 case 3:
                   fillColor = "rgba(100, 200, 0, 255)";
-                  break; // Green
+                  break;
                 case 4:
                   fillColor = "rgba(108, 0, 255, 255)";
-                  break; // Purple
+                  break;
               }
               p.fill(fillColor);
               p.ellipse(x + wid / 2, y + wid / 2, wid / 2, wid / 2);
 
-              // Optional: Direction line for the robot
               let lineEndX = x + wid / 2;
               let lineEndY = y + wid / 2;
               const directionLineLength = wid / 4;
@@ -368,7 +287,7 @@ function removeWalls(a, b) {
                     lineEndX -= directionLineLength;
                     break;
                 }
-                p.stroke(255); // White for visibility
+                p.stroke(255);
                 p.line(x + wid / 2, y + wid / 2, lineEndX, lineEndY);
               }
             }
@@ -378,44 +297,34 @@ function removeWalls(a, b) {
     }, mazeContainer);
   }
 
-
-
   $: if (serializedMaze && mazeContainer) {
     drawSerializedMaze();
   }
-  
-
-
-  // Modified Cell function to accept and draw based on serialized data
 
   onMount(() => {
-  // Listen for 'update_maze' event from the server
-  socket.on('update_maze', (data) => {
-    console.log('Received updated maze:', data);
-    serializedMaze = data.updatedMaze; // Update your maze data
-    drawSerializedMaze(); // Re-draw the maze with the updated data
-  });
+    socket.on('update_maze', (data) => {
+      console.log('Received updated maze:', data);
+      serializedMaze = data.updatedMaze;
+      drawSerializedMaze();
+    });
 
-  // Listen for 'update_score' event from the server to update the score
-  socket.on('update_score', (data) => {
-    score = data.score; // Update the score from the server
-    console.log('Score updated:', score); // Optionally log the updated score
-  });
+    socket.on('update_score', (data) => {
+      score = data.score;
+      console.log('Score updated:', score);
+    });
 
-  // Initial maze generation and display
-  serializedMaze = generateMaze(16, 16);
-  drawSerializedMaze();
+    serializedMaze = generateMaze(16, 16);
+    drawSerializedMaze();
   });
   
   onDestroy(() => {
-  if (p5Sketch) {
-    p5Sketch.remove();
-  }
-  socket.off('update_maze');
-  socket.off('update_score');
+    if (p5Sketch) {
+      p5Sketch.remove();
+    }
+    socket.off('update_maze');
+    socket.off('update_score');
   });
 
- 
   function promptForFileName() {
     isSaving = true;
   }
@@ -431,7 +340,7 @@ function removeWalls(a, b) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${$userToken}` // Include the JWT in requests
+          'Authorization': `Bearer ${$userToken}`
         },
         body: JSON.stringify({
           userEmail: userCurrentEmail,
@@ -466,16 +375,6 @@ function removeWalls(a, b) {
     }
   }
 
-
-
-  /**
-   * Fetches saved files for the current user from the server.
-   *
-   * This function sends a GET request to the `/api/get-texts` endpoint on the server,
-   * passing the user's email and authentication token as headers. If the request is
-   * successful, the fetched files are stored in the `savedFiles` variable. If the
-   * request fails, an alert is shown to the user.
-   */
   async function fetchSavedFiles() {
     const response = await fetch(
       `http://localhost:3000/api/get-texts?userEmail=${$userEmail}`,
@@ -483,25 +382,19 @@ function removeWalls(a, b) {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${$userToken}`, // Include the JWT in requests
+          Authorization: `Bearer ${$userToken}`,
         },
       }
     );
 
     if (response.ok) {
       savedFiles = await response.json();
-      console.log(savedFiles); // Correctly logging the fetched files
+      console.log(savedFiles);
     } else {
       alert("Failed to fetch files.");
     }
   }
 
-  /**
-   * Loads the content of a selected file and copies it to the clipboard.
-   *
-   * @param {Event} event - The event object containing the selected file.
-   * @returns {Promise<void>} - A Promise that resolves when the file content has been copied to the clipboard.
-   */
   async function loadFileContent(event) {
     const selectedFileName = event.target.value;
     const selectedFile = savedFiles.find(
@@ -511,7 +404,7 @@ function removeWalls(a, b) {
       try {
         await navigator.clipboard.writeText(selectedFile.content);
         console.log("File content copied to clipboard.");
-        alert("File content copied to clipboard."); // Optional: Inform the user
+        alert("File content copied to clipboard.");
       } catch (error) {
         console.error("Could not copy text to clipboard", error);
         alert("Failed to copy file content to clipboard.");
@@ -521,31 +414,8 @@ function removeWalls(a, b) {
     }
   }
 
-  function toggleDropdownAnimation() {
-    const dropdown = document.querySelector('.file-dropdown');
-    if (dropdown) {
-      dropdown.classList.toggle('show'); // Toggle the 'show' class to apply the animation
-    }
-}
-
-  async function handleFileButtonClick() {
-    await fetchSavedFiles();
-    toggleDropdownAnimation();
-  }
-
-
-
-  /**
-   * Runs a simulation using the provided algorithm code and serialized maze data.
-   *
-   * This function sends a POST request to the backend server at `http://localhost:5001/run` with the algorithm code and serialized maze data. It then logs the simulation result to the console.
-   *
-   * @param {string} editorText - The algorithm code to be used in the simulation.
-   * @param {string} serializedMaze - The serialized maze data to be used in the simulation.
-   * @returns {Promise<void>} - A Promise that resolves when the simulation is complete.
-   */
   async function runSimulation() {
-    const algorithmCode = editorText; // Your algorithm code here)
+    const algorithmCode = editorText;
     const serializedMazeSent = serializedMaze;
     try {
       const response = await fetch("http://localhost:5001/run", {
@@ -565,45 +435,22 @@ function removeWalls(a, b) {
 
       const data = await response.json();
       console.log("Simulation result:", data);
-      // Update your front-end accordingly with the received data
     } catch (error) {
       console.error("Error running simulation:", error);
     }
   }
 
-  /**
-   * Handles the click event of the run button in the maze simulation.
-   * This function serializes the current maze data to a JSON string and copies it to the clipboard.
-   * If the copy operation is successful, an alert is shown to the user. If an error occurs, an error alert is shown instead.
-   */
   async function handleRunButtonClick() {
     try {
-      // Serialize the maze data to a JSON string
       const serializedData = JSON.stringify(serializedMaze, null, 2);
-      // Copy the serialized data to the clipboard
       await navigator.clipboard.writeText(serializedData);
-      // Alert the user that the data has been copied
       alert("Serialized maze data has been copied to clipboard.");
     } catch (error) {
       console.error("Error copying serialized maze data to clipboard:", error);
-      // Alert the user in case of an error
       alert("Failed to copy serialized maze data to clipboard.");
     }
   }
 
-  /**
-   * Stops the current simulation and updates the user's software score.
-   *
-   * This function performs the following steps:
-   * 1. Logs a message to the console and displays an alert indicating that the simulation is being stopped.
-   * 2. Sends a POST request to the `/reset` endpoint to reset the simulation.
-   * 3. If the reset is successful, sends a PATCH request to the `/api/update-software-score` endpoint to update the user's software score.
-   * 4. Displays an alert with the updated software score.
-   *
-   * @async
-   * @function
-   * @throws {Error} If there is an error during the reset or score update process.
-   */
   async function stopSimulation() {
     console.log(`Stopping simulation for user: ${$userEmail}`);
     alert(`Stopping simulation for user: ${$userEmail}`);
@@ -656,17 +503,13 @@ function removeWalls(a, b) {
 
   async function resetSimulation() {
     score = 0;
-    // After resetting the simulation, generate a new random maze
-    serializedMaze = generateMaze(16, 16); // Adjust dimensions as needed
-    drawSerializedMaze(); // Redraw the maze with new data
+    serializedMaze = generateMaze(16, 16);
+    drawSerializedMaze();
   }
 
-
+  onMount(fetchSavedFiles); // Fetch saved files when component mounts
 
 </script>
-
-
-
 
 <Navi/>
 <div class="loggin">
@@ -683,7 +526,7 @@ function removeWalls(a, b) {
       <h1 class="title is-1"style="padding:20px">Maze Simulator</h1>
     </div>
     <div class="score-container">
-      <h2>Score: {score}</h2> <!-- Display the score -->
+      <h2>Score: {score}</h2>
     </div>
     <div class="is-flex is-justify-content-space-between" style="flex: 1; width: 100%;">
       <div style="flex: 1;">
@@ -691,14 +534,12 @@ function removeWalls(a, b) {
       </div>
       <div style="flex: 2;">
         <div class="content">
-          {#if savedFiles.length > 0}
-            <select on:change="{loadFileContent}" class="file-dropdown">
-              <option value="">Select a file...</option>
-              {#each savedFiles as file}
-                <option value="{file.fileName}">{file.fileName}</option>
-              {/each}
-            </select>
-          {/if}
+          <select on:change="{loadFileContent}" class="file-dropdown">
+            <option value="">Select a file...</option>
+            {#each savedFiles as file}
+              <option value="{file.fileName}">{file.fileName}</option>
+            {/each}
+          </select>
           <AceEditor bind:value={editorText} />
         </div>
         {#if isSaving}
@@ -709,13 +550,9 @@ function removeWalls(a, b) {
         {:else}
           <div class="button-container">
             <button class="thin-button" on:click={promptForFileName}>Save</button>
-            <button class="thin-button" on:click={handleFileButtonClick}>File</button>
             <button class="thin-button" on:click={runSimulation}>Run</button>
             <button class="thin-button" on:click={stopSimulation}>Stop</button>
             <button class="thin-button" on:click={resetSimulation}>Reset</button>
-
-
-            <!-- <button class="thin-button" on:click={handleRunButtonClick}>Run</button> -->
           </div>
         {/if}
       </div>
@@ -731,17 +568,12 @@ function removeWalls(a, b) {
     <div class="camera-feed">
       <img src="http://192.168.1.78:8000/" alt="Live Camera Feed" />
     </div>
-    <!-- Camera feed integration ends here -->
-    
-    <!-- Buttons -->
     <div class="button-container">
       <button class="thin-button" on:click={promptForFileName}>Save</button>
-      <button class="thin-button" on:click={handleFileButtonClick}>File</button>
       <button class="thin-button-left" on:click={uploadToBot}>Upload to bot</button>
     </div>
   </div>
 {/if}
-
 
 <div class="content has-text-centered">
   <p style="color: white; padding: 50px;">
@@ -752,25 +584,25 @@ function removeWalls(a, b) {
 <style>
   .button-container-top {
     display: flex;
-    width: calc(100% - 4rem); /* Subtract 2rem on both sides for left and right margins */
+    width: calc(100% - 4rem);
     margin: 0 2rem;
   }
 
   .loggin {
     display: flex;
-    width: calc(100% - 4rem); /* Subtract 2rem on both sides for left and right margins */
+    width: calc(100% - 4rem);
     margin: 0 2rem;
     background-color: #B71234;
     border: #000 1px solid;
   }
 
   .thin-button-top {
-    flex: 1; /* Make each button take up equal width */
-    margin: 0; /* Remove default margin */
-    padding: 5px 10px; /* Adjust padding for your desired thickness */
-    border: none; /* Remove border */
-    background-color: #B71234; /* Set background color */
-    color: #fff; /* Set text color */
+    flex: 1;
+    margin: 0;
+    padding: 5px 10px;
+    border: none;
+    background-color: #B71234;
+    color: #fff;
     cursor: pointer;
     border: #000 1px solid;
   }
@@ -781,19 +613,18 @@ function removeWalls(a, b) {
   }
 
   .thin-button {
-    margin: 0; /* Remove default margin */
-    padding: 5px 10px; /* Adjust padding for your desired thickness */
-    border: none; /* Remove border */
-    background-color: #B71234; /* Set background color */
-    color: #fff; /* Set text color */
+    margin: 0;
+    padding: 5px 10px;
+    border: none;
+    background-color: #B71234;
+    color: #fff;
     cursor: pointer;
   }
 
-  /* Styles for the overall layout */
   .is-square {
-    height: 100vh; /* Adjusted for larger size */
+    height: 100vh;
     background-color: lightgray;
-    width: calc(100% - 4rem); /* Subtract 2rem on both sides for left and right margins */
+    width: calc(100% - 4rem);
     margin: 0 2rem;
     border: #000 1px solid;
   }
@@ -818,155 +649,137 @@ function removeWalls(a, b) {
   }
 
   .file-dropdown {
-  margin: 10px 0;
-  padding: 5px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-}
-
-/* Add a keyframe for the appearance animation */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+    margin: 10px 0;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .file-name-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.5s ease-out;
   }
-}
 
-.file-name-input {
-  display: flex;
-  align-items: center;
-  gap: 10px; /* Add some space between the text box and the button */
-  animation: slideIn 0.5s ease-out; /* Use the defined animation */
-}
+  .file-name-input input[type="text"] {
+    padding: 8px 10px;
+    border: 2px solid #B71234;
+    border-radius: 4px;
+    transition: border-color 0.3s;
+    outline: none;
+  }
 
-.file-name-input input[type="text"] {
-  padding: 8px 10px;
-  border: 2px solid #B71234; /* A solid border to match the button color */
-  border-radius: 4px; /* Rounded corners for the text box */
-  transition: border-color 0.3s; /* Smooth transition for border color */
-  outline: none; /* Remove default focus outline */
-}
+  .file-name-input input[type="text"]:focus {
+    border-color: #ff6363;
+  }
 
-.file-name-input input[type="text"]:focus {
-  border-color: #ff6363; /* Change border color on focus */
-}
+  .file-name-input button {
+    padding: 8px 15px;
+    background-color: #B71234;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+  }
 
-.file-name-input button {
-  padding: 8px 15px;
-  background-color: #B71234;
-  color: white;
-  border: none;
-  border-radius: 4px; /* Rounded corners for the button */
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s; /* Smooth transitions for hover effects */
-}
+  .file-name-input button:hover {
+    background-color: #ff6363;
+    transform: translateY(-2px);
+  }
 
-.file-name-input button:hover {
-  background-color: #ff6363; /* Lighten the button color on hover */
-  transform: translateY(-2px); /* Slight lift effect */
-}
+  .file-name-input button:active {
+    transform: translateY(1px);
+  }
 
-.file-name-input button:active {
-  transform: translateY(1px); /* Push effect on click */
-}
+  .file-dropdown {
+    appearance: none;
+    width: 100%;
+    padding: 8px 12px;
+    background-color: #f2f2f2;
+    border: 2px solid #B71234;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
 
-.file-dropdown {
-  appearance: none; /* Remove default browser styling */
-  width: 100%; /* Make dropdown full-width */
-  padding: 8px 12px;
-  background-color: #f2f2f2; /* Light background color */
-  border: 2px solid #B71234; /* Match the theme */
-  border-radius: 5px; /* Rounded corners */
-  font-size: 16px; /* Increase font size for better readability */
-  cursor: pointer; /* Change cursor to indicate it's clickable */
-  outline: none; /* Remove default focus outline */
-  transition: background-color 0.3s, border-color 0.3s; /* Smooth transition for background and border */
-}
+  .file-dropdown:hover {
+    background-color: #e6e6e6;
+  }
 
-.file-dropdown:hover {
-  background-color: #e6e6e6; /* Slightly darker background on hover */
-}
+  .file-dropdown:focus {
+    border-color: #ff6363;
+  }
 
-.file-dropdown:focus {
-  border-color: #ff6363; /* Highlighted border when focused */
-}
+  .file-dropdown:active {
+    background-color: #cccccc;
+  }
 
-.file-dropdown:active {
-  background-color: #cccccc; /* Even darker background when clicked */
-}
+  .thin-button-left {
+    margin: 0;
+    padding: 10px 20px;
+    border: none;
+    background-color: #B71234;
+    color: white;
+    cursor: pointer;
+  }
 
-.thin-button-left {
-  margin: 0; /* Remove default margin */
-  padding: 10px 20px; /* Adjust padding to make the button more prominent */
-  border: none; /* Remove border */
-  background-color: #B71234;  /* A distinct, eye-catching color */
-  color: white; /* Set text color to white for contrast */
-  cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
-}
+  .thin-button-left:hover {
+    background-color:gray;
+  }
 
-.thin-button-left:hover {
-  background-color:gray; /* Darken the button color slightly on hover */
-}
+  .thin-button-left:active {
+    transform: translateY(2px);
+  }
 
-.thin-button-left:active {
-  transform: translateY(2px); /* Slight push effect when clicked */
-}
+  .camera-feed {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+    padding: 20px;
+    margin: 20px auto;
+    border: 3px solid #ddd;
+    max-width: 820px;
+  }
 
-.camera-feed {
-  display: flex;
-  justify-content: center; /* Keeps the content centered */
-  align-items: center; /* Aligns items vertically */
-  background-color: #000; /* Black background */
-  padding: 20px; /* Padding around the video feed */
-  margin: 20px auto; /* Centers the container and adds margin around it */
-  border: 3px solid #ddd; /* Optional border for the camera feed container */
-  max-width: 820px; /* Adjust this value based on the camera feed size */
-}
+  .camera-feed img {
+    width: 100%;
+    height: auto;
+  }
 
-.camera-feed img {
-  width: 100%; /* Makes the image fill the container */
-  height: auto; /* Maintains the aspect ratio */
-}
-.title-container {
-  text-align: center; /* Centers the title text */
-  width: 100%; /* Ensure the container spans the full width */
-}
+  .title-container {
+    text-align: center;
+    width: 100%;
+  }
+
   .title.is-1 {
-  color: #ffffff; /* Sets the title color to white */
-}
-
-
-
-.score-container {
-  position:static;       /* Position relative to nearest positioned ancestor */
-  top: 10px;                /* Distance from the top of the parent container */
-  right: 10px;              /* Distance from the right of the parent container */
-  background-color: #010000; /* Light background color for visibility */
-  color: #ffffff;              /* Text color */
-  padding: 10px 20px;       /* Padding inside the container */
-  border-radius: 8px;       /* Rounded corners */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
-  z-index: 100;             /* Ensures it's above other content in the software section */
-}
-
-
-
-/* Animation for dropdown appearance */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+    color: #ffffff;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .score-container {
+    position:static;
+    top: 10px;
+    right: 10px;
+    background-color: #010000;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 100;
   }
-}
 
-
-
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>

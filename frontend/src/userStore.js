@@ -37,3 +37,12 @@ export function clearToken() {
     userToken.set("");
     userEmail.set("");
 }
+
+// Function to check if the token is expired
+export function isTokenExpired() {
+  const token = localStorage.getItem('jwtToken');
+  if (!token) return true;
+
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  return payload.exp * 1000 < Date.now();
+}
