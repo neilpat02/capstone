@@ -7,7 +7,9 @@
   import p5 from 'p5'; //p5 library for the graphical representation of the maze
   import io from 'socket.io-client'; 
 
-  const socket = io('http://localhost:5001'); 
+  const TARGET_URI = `http://34.122.251.129:8080`
+
+  const socket = io(TARGET_URI); 
   let showSoftware = true; //show the software section by default
   let mazeContainer;
   let editorText = ""; //track the code that is written
@@ -45,7 +47,7 @@
     }
 
     try {
-      const flaskResponse = await fetch("http://localhost:5001/upload_to_bot", {
+      const flaskResponse = await fetch(`${TARGET_URI}/upload_to_bot`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -418,7 +420,7 @@
     const algorithmCode = editorText;
     const serializedMazeSent = serializedMaze;
     try {
-      const response = await fetch("http://localhost:5001/run", {
+      const response = await fetch(`${TARGET_URI}/run`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -456,7 +458,7 @@
     alert(`Stopping simulation for user: ${$userEmail}`);
 
     try {
-      const resetResponse = await fetch("http://localhost:5001/reset", {
+      const resetResponse = await fetch(`${TARGET_URI}/reset`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
